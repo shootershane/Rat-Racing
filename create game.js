@@ -1,0 +1,57 @@
+const rats=["Cheddar","Rocket","Pizza Pete","Peanut","Slick","Scraps","Pepper","King Gouda","Donut","Sprinkles","Hot Sauce","Moonpie","Magnet","Gizmo","Shadow","Tater","Popcorn","Cookie","Dusty","Rusty","Burger","Banana","Grape","Lucky"];
+const grid=document.getElementById("grid"),chosen=[];
+rats.forEach((r,i)=>{
+ const c=document.createElement("div");
+ c.className="card";
+ c.innerHTML=`<h3>ðŸ€ ${r}</h3><button>Select</button>`;
+ const b=c.querySelector("button");
+ b.onclick=()=>{
+  let k=chosen.indexOf(i);
+  if(k>=0){chosen.splice(k,1);c.classList.remove("sel");b.textContent="Select";}
+  else if(chosen.length<12){chosen.push(i);c.classList.add("sel");b.textContent="Selected";}
+  count.textContent=`${chosen.length} / 12 Selected`;
+  start.disabled=chosen.length!==12;
+ };
+ grid.appendChild(c);
+});
+start.onclick=()=>{
+ race.classList.remove("hidden");
+ msg.textContent="3...";
+ track.innerHTML="";
+ grid.style.display="none";
+ toolbar.style.display="none";
+ let racers=[];
+ chosen.forEach(i=>{
+   let lane=document.createElement("div");
+   lane.className="lane";
+   let rat=document.createElement("div");
+   rat.className="rat";
+   rat.textContent="ðŸ€ "+rats[i];
+   lane.appendChild(rat);
+   track.appendChild(lane);
+   racers.push({n:rats[i],e:rat,p:0});
+ });
+ let t=3;
+ let cd=setInterval(()=>{
+   if(t>0)msg.textContent=t+"...";
+   else if(t===0)msg.textContent="GO!";
+   else{clearInterval(cd);run();}
+   t--;
+ },800);
+ function run(){
+  let over=false;
+  let loop=setInterval(()=>{
+    racers.forEach(r=>{
+      if(over)return;
+      r.p+=Math.random()*2;
+      r.e.style.left=r.p+"%";
+      if(r.p>=92){
+        over=true;
+        clearInterval(loop);
+        msg.textContent="ðŸ† Winner: "+r.n;
+        again.classList.remove("hidden");
+      }
+    });
+  },60);
+ }
+}
