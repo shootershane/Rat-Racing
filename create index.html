@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rat Racing</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<h1>🐀 Rat Racing</h1>
+<p>Select 12 racers</p>
+</header>
+
+<div id="grid"></div>
+
+<div id="toolbar">
+<span id="count">0 / 12 Selected</span>
+<button id="start" disabled>Start Race</button>
+</div>
+
+<section id="race" class="hidden">
+<h2 id="msg"></h2>
+<div id="track"></div>
+<button id="again" class="hidden" onclick="location.reload()">Race Again</button>
+</section>
+
+<script src="game.js"></script>
+</body>
+</html>
