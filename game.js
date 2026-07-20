@@ -354,8 +354,9 @@ function finishRace(){
         race.animationId
     );
 
-    const winner=race.racers[0];
-
+    const winner = [...race.racers].sort(
+    (a, b) => b.progress - a.progress
+)[0];
     setTimeout(()=>{
 
         raceScreen.classList.add("hidden");
