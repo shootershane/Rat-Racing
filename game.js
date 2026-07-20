@@ -185,7 +185,8 @@ function startRace() {
 
     const racers = selected.map((ratIndex, lane) => ({
         lane,
-        speed: 0,
+        speed: 1,
+        targetSpeed: 1,
         position: 0
     }));
 
