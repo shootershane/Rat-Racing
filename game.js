@@ -124,3 +124,69 @@ startRaceButton.addEventListener("click", startRace);
 buildRatCards();
 
 updateCounter();
+// =====================================================
+// RAT RACING
+// GAME.JS - PART 2
+// Build the race track
+// =====================================================
+
+// ---------- MORE ELEMENTS ----------
+
+const selectionScreen = document.getElementById("selectionScreen");
+const raceScreen = document.getElementById("raceScreen");
+const trackArea = document.getElementById("trackArea");
+const leaderList = document.getElementById("leaderList");
+
+// ---------- BUILD TRACK ----------
+
+function buildTrack() {
+
+    trackArea.innerHTML = "";
+    leaderList.innerHTML = "";
+
+    selected.forEach((ratIndex, lane) => {
+
+        const rat = rats[ratIndex];
+
+        // Create lane
+        const laneDiv = document.createElement("div");
+        laneDiv.className = "trackLane";
+
+        // Create runner
+        const runner = document.createElement("div");
+        runner.className = "runner";
+        runner.id = "runner" + lane;
+
+        runner.textContent = "🐀 " + rat.name;
+
+        laneDiv.appendChild(runner);
+        trackArea.appendChild(laneDiv);
+
+        // Leaderboard
+        const item = document.createElement("li");
+        item.id = "leader" + lane;
+        item.textContent = rat.name;
+
+        leaderList.appendChild(item);
+
+    });
+
+}
+
+// ---------- REPLACE START BUTTON ----------
+
+// Remove the old click event
+startRaceButton.removeEventListener("click", startRace);
+
+// New start function
+function startRace() {
+
+    selectionScreen.classList.add("hidden");
+    raceScreen.classList.remove("hidden");
+
+    buildTrack();
+
+}
+
+// Add new click event
+startRaceButton.addEventListener("click", startRace);
