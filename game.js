@@ -1,153 +1,126 @@
+
+// =====================================================
+// RAT RACING
+// GAME.JS - PART 1
+// Replace your entire game.js with this file.
+// =====================================================
+
+// ---------- RAT DATA ----------
+
 const rats = [
-    {name:"Cheddar", bio:"Cocky champion", icon:"🐭"},
-    {name:"Rocket", bio:"Always talking trash", icon:"🐭"},
-    {name:"Pizza Pete", bio:"Powered by pizza", icon:"🐭"},
-    {name:"Peanut", bio:"Small but fearless", icon:"🐭"},
-    {name:"Cowboy Jack", bio:"Yee-haw!", icon:"🐭"},
-    {name:"Captain Whiskers", bio:"Pirate legend", icon:"🐭"},
-    {name:"Shadow", bio:"Silent ninja", icon:"🐭"},
-    {name:"King Gouda", bio:"Royal cheese lover", icon:"🐭"},
-    {name:"Chef Alfredo", bio:"Master cook", icon:"🐭"},
-    {name:"Professor Pip", bio:"Crazy inventor", icon:"🐭"},
-    {name:"Tank", bio:"Big muscles", icon:"🐭"},
-    {name:"Slick", bio:"Too cool", icon:"🐭"},
-    {name:"Ace", bio:"Born to race", icon:"🐭"},
-    {name:"Rusty", bio:"Construction pro", icon:"🐭"},
-    {name:"Sparky", bio:"Firefighter", icon:"🐭"},
-    {name:"Turbo", bio:"Speed addict", icon:"🐭"},
-    {name:"Riff", bio:"Rock star", icon:"🐭"},
-    {name:"Sergeant Squeak", bio:"Never quits", icon:"🐭"},
-    {name:"Taco", bio:"Always hungry", icon:"🐭"},
-    {name:"Donut", bio:"Sweet racer", icon:"🐭"},
-    {name:"Bubbles", bio:"Full of energy", icon:"🐭"},
-    {name:"Dusty", bio:"Keeps it clean", icon:"🐭"},
-    {name:"Magnet", bio:"Loves gadgets", icon:"🐭"},
-    {name:"Lucky", bio:"Trusts good fortune", icon:"🐭"}
+    { name: "Cheddar", bio: "Cocky Champion" },
+    { name: "Rocket", bio: "Trash Talker" },
+    { name: "Pizza Pete", bio: "Powered By Pizza" },
+    { name: "Peanut", bio: "Tiny But Fearless" },
+    { name: "Cowboy Jack", bio: "Wild West Racer" },
+    { name: "Captain Whiskers", bio: "Pirate Legend" },
+    { name: "Shadow", bio: "Sneaky Ninja" },
+    { name: "King Gouda", bio: "Royal Racer" },
+    { name: "Chef Alfredo", bio: "Master Chef" },
+    { name: "Professor Pip", bio: "Crazy Inventor" },
+    { name: "Tank", bio: "Built Like A Truck" },
+    { name: "Slick", bio: "Too Cool" },
+    { name: "Ace", bio: "Natural Winner" },
+    { name: "Rusty", bio: "Construction Rat" },
+    { name: "Sparky", bio: "Firefighter" },
+    { name: "Turbo", bio: "Loves Speed" },
+    { name: "Riff", bio: "Rock Star" },
+    { name: "Sergeant Squeak", bio: "Never Gives Up" },
+    { name: "Taco", bio: "Always Hungry" },
+    { name: "Donut", bio: "Sweet Tooth" },
+    { name: "Bubbles", bio: "Happy Go Lucky" },
+    { name: "Dusty", bio: "Janitor" },
+    { name: "Magnet", bio: "Gadget Builder" },
+    { name: "Lucky", bio: "Feels Lucky" }
 ];
+
+// ---------- GAME STATE ----------
 
 const selected = [];
 
-const grid = document.getElementById("ratGrid");
-console.log(grid);
-const counter = document.getElementById("selectedCount");
-const startButton = document.getElementById("startRace");
+// ---------- ELEMENTS ----------
+
+const ratGrid = document.getElementById("ratGrid");
+const selectedCount = document.getElementById("selectedCount");
+const startRaceButton = document.getElementById("startRace");
+
+// ---------- FUNCTIONS ----------
 
 function updateCounter() {
-    counter.textContent = `${selected.length} / 12 Selected`;
-    startButton.disabled = selected.length !== 12;
+
+    selectedCount.textContent =
+        `${selected.length} / 12 Selected`;
+
+    startRaceButton.disabled =
+        selected.length !== 12;
+
 }
 
-function buildGrid() {
+function toggleRat(index, card) {
 
-    grid.innerHTML = "";
+    const alreadySelected = selected.includes(index);
 
-    rats.forEach((rat,index)=>{
+    if (alreadySelected) {
+
+        selected.splice(selected.indexOf(index), 1);
+
+        card.classList.remove("selected");
+
+    } else {
+
+        if (selected.length >= 12)
+            return;
+
+        selected.push(index);
+
+        card.classList.add("selected");
+
+    }
+
+    updateCounter();
+
+}
+
+function buildRatCards() {
+
+    ratGrid.innerHTML = "";
+
+    rats.forEach((rat, index) => {
 
         const card = document.createElement("div");
+
         card.className = "ratCard";
 
         card.innerHTML = `
-            <div class="ratPortrait">${rat.icon}</div>
+            <div class="ratPortrait">🐀</div>
             <div class="ratName">${rat.name}</div>
             <div class="ratBio">${rat.bio}</div>
         `;
 
-        card.addEventListener("click",()=>{
+        card.addEventListener("click", function () {
 
-            const alreadySelected = selected.includes(index);
-
-            if(alreadySelected){
-
-                selected.splice(selected.indexOf(index),1);
-                card.classList.remove("selected");
-
-            }else{
-
-                if(selected.length>=12)
-                    return;
-
-                selected.push(index);
-                card.classList.add("selected");
-
-            }
-
-            updateCounter();
+            toggleRat(index, card);
 
         });
 
-        grid.appendChild(card);
+        ratGrid.appendChild(card);
 
     });
 
 }
 
-startButton.addEventListener("click",()=>{
+// ---------- START BUTTON ----------
 
-    document.getElementById("selectionScreen").classList.add("hidden");
-    document.getElementById("raceScreen").classList.remove("hidden");
+function startRace() {
 
-    alert("Part 2 will build the race track!");
-/* ======================================================
-   PART 2 - BUILD THE RACE TRACK
-   ====================================================== */
-
-const trackArea = document.getElementById("trackArea");
-const leaderList = document.getElementById("leaderList");
-
-function buildTrack() {
-
-    trackArea.innerHTML = "";
-    leaderList.innerHTML = "";
-
-    selected.forEach((ratIndex, lane) => {
-
-        const rat = rats[ratIndex];
-
-        // Create lane
-        const laneDiv = document.createElement("div");
-        laneDiv.className = "trackLane";
-
-        // Create runner
-        const runner = document.createElement("div");
-        runner.className = "runner";
-        runner.id = `runner${lane}`;
-
-        runner.textContent = `${rat.icon} ${rat.name}`;
-
-        laneDiv.appendChild(runner);
-        trackArea.appendChild(laneDiv);
-
-        // Initial leaderboard
-        const place = document.createElement("li");
-        place.id = `place${lane}`;
-        place.textContent = rat.name;
-
-        leaderList.appendChild(place);
-
-    });
+    alert("Race engine coming in Part 2.");
 
 }
 
-/* ======================================================
-   Replace the temporary Start button behavior
-   ====================================================== */
+startRaceButton.addEventListener("click", startRace);
 
-startButton.removeEventListener("click", ()=>{});
+// ---------- START GAME ----------
 
-startButton.onclick = () => {
+buildRatCards();
 
-    document
-        .getElementById("selectionScreen")
-        .classList.add("hidden");
-
-    document
-        .getElementById("raceScreen")
-        .classList.remove("hidden");
-
-    buildTrack();
-
-};
-});
-
-buildGrid();
 updateCounter();
