@@ -136,10 +136,9 @@ button:disabled{
 
 .runner{
     position:absolute;
-    left:10px;
+    left:0;
     top:4px;
     font-size:34px;
-    transition:left .12s linear;
 }
 
 #leaderboard{
