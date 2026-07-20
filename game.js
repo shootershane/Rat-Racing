@@ -174,3 +174,51 @@ function createRace() {
 
 }
 
+// =====================================================
+// PART 2 - Build Track & Start Race
+// =====================================================
+
+// Build the race track
+function buildTrack() {
+
+    trackArea.innerHTML = "";
+    leaderList.innerHTML = "";
+
+    race.racers.forEach((racer) => {
+
+        const lane = document.createElement("div");
+        lane.className = "trackLane";
+
+        const runner = document.createElement("div");
+        runner.className = "runner";
+        runner.id = `runner-${racer.lane}`;
+        runner.textContent = "🐀";
+
+        lane.appendChild(runner);
+        trackArea.appendChild(lane);
+
+        const li = document.createElement("li");
+        li.id = `leader-${racer.lane}`;
+        li.textContent = rats[racer.ratIndex].name;
+
+        leaderList.appendChild(li);
+
+    });
+
+}
+
+// Start race button
+startRaceButton.addEventListener("click", () => {
+
+    if (selected.length !== 12) return;
+
+    createRace();
+    buildTrack();
+
+    selectionScreen.classList.add("hidden");
+    raceScreen.classList.remove("hidden");
+
+    // Part 3 starts the animation.
+    // We'll call startRace() here later.
+
+});
