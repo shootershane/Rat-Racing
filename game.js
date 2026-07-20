@@ -205,8 +205,10 @@ racer.speed += (Math.random() - 0.5) * 0.03;
 if (racer.speed < 0.8) racer.speed = 0.8;
 if (racer.speed > 1.8) racer.speed = 1.8;
 
-racer.position += racer.speed;            if (racer.position > 100)
+racer.position += racer.speed;
+            if (racer.position > 100) {
                 racer.position = 100;
+            }
 
             document.getElementById("runner" + racer.lane).style.left =
                 racer.position + "%";
