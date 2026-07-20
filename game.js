@@ -164,23 +164,7 @@ function buildTrack() {
 
 }
 
-// ---------- REPLACE START BUTTON ----------
 
-// Remove the old click event
-
-
-// New start function
-function startRace() {
-
-    selectionScreen.classList.add("hidden");
-    raceScreen.classList.remove("hidden");
-
-    buildTrack();
-
-}
-
-// Add new click event
-startRaceButton.addEventListener("click", startRace);
 // =====================================================
 // RAT RACING
 // GAME.JS - PART 3
@@ -269,4 +253,4 @@ function startRace() {
     }, 60);
 
 }
-
+startRaceButton.addEventListener("click", startRace);
