@@ -168,7 +168,7 @@ function buildTrack() {
 // =====================================================
 // RAT RACING
 // GAME.JS - PART 3
-// Smooth Race Engine
+// Improved Race Engine
 // =====================================================
 
 let raceInterval = null;
@@ -179,54 +179,60 @@ function startRace() {
     raceScreen.classList.remove("hidden");
 
     buildTrack();
-    console.log(document.getElementById("runner0"))
 
     clearInterval(raceInterval);
 
+    const finish = trackArea.clientWidth - 80;
+
     const racers = selected.map((ratIndex, lane) => ({
         lane,
-        speed: 1,
-        targetSpeed: 1,
-        position: 0
+        position: 0,
+        speed: 1 + Math.random(),
+        targetSpeed: 1 + Math.random()
     }));
 
     raceInterval = setInterval(() => {
 
         racers.forEach(racer => {
 
-            // Smooth acceleration/deceleration
-            const targetSpeed = 1.1 + Math.random() * 0.5;
+            // Occasionally pick a new pace
+            if (Math.random() < 0.03) {
+                racer.targetSpeed = 0.8 + Math.random() * 2.4;
+            }
 
-// Smoothly accelerate toward the target speed
-racer.speed += (targetSpeed - racer.speed) * 0.03;
+            // Smooth acceleration
+            racer.speed += (racer.targetSpeed - racer.speed) * 0.08;
 
-// Tiny random burst to keep the race exciting
-racer.speed += (Math.random() - 0.5) * 0.03;
+            // Tiny random burst
+            racer.speed += (Math.random() - 0.5) * 0.04;
 
-// Keep speeds realistic
-if (racer.speed < 0.8) racer.speed = 0.8;
-if (racer.speed > 1.8) racer.speed = 1.8;
+            // Clamp speeds
+            if (racer.speed < 0.7) racer.speed = 0.7;
+            if (racer.speed > 3.0) racer.speed = 3.0;
 
-racer.position += racer.speed;
+            // Move
+            racer.position += racer.speed;
 
-const finish = trackArea.clientWidth - 80;
+            if (racer.position > finish) {
+                racer.position = finish;
+            }
 
-if (racer.position > finish) {
-    racer.position = finish;
-}
+            const runner = document.getElementById("runner" + racer.lane);
 
-document.getElementById("runner" + racer.lane).style.left =
-    racer.position + "px";
+            if (runner) {
+                runner.style.left = racer.position + "px";
+            }
+
         });
 
-        racers.sort((a, b) => b.position - a.position);
+        // Leaderboard
+        const standings = [...racers].sort((a, b) => b.position - a.position);
 
         leaderList.innerHTML = "";
 
-        racers.forEach((racer, place) => {
+        standings.forEach((racer, place) => {
 
             const li = document.createElement("li");
-
             li.textContent =
                 `${place + 1}. ${rats[selected[racer.lane]].name}`;
 
@@ -235,19 +241,22 @@ document.getElementById("runner" + racer.lane).style.left =
         });
 
         document.getElementById("leaderName").textContent =
-            rats[selected[racers[0].lane]].name;
+            rats[selected[standings[0].lane]].name;
 
-        if (racers[0].position >= 100) {
+        // Finish
+        if (standings[0].position >= finish) {
 
             clearInterval(raceInterval);
 
             setTimeout(() => {
 
-                alert("🏆 " +
-                    rats[selected[racers[0].lane]].name +
-                    " Wins!");
+                alert(
+                    "🏆 " +
+                    rats[selected[standings[0].lane]].name +
+                    " Wins!"
+                );
 
-            }, 300);
+            }, 500);
 
         }
 
@@ -256,4 +265,3 @@ document.getElementById("runner" + racer.lane).style.left =
 }
 
 startRaceButton.addEventListener("click", startRace);
-
