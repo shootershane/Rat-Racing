@@ -232,43 +232,40 @@ function updateRace(delta) {
             return;
         }
 
-        // Smooth performance multiplier
-       const variation =
-    0.90 + Math.random() * 0.20;
-        // Acceleration
-        racer.speed +=
-            racer.profile.acceleration *
-            delta *
-            0.012;
+        // Random target speed (changes every frame)
+        const targetSpeed = 7 + Math.random() * 6;
 
-        // Top speed cap
-        const maxSpeed =
-            racer.profile.topSpeed *
-            variation;
+        // Smoothly move toward that speed
+        racer.speed += (targetSpeed - racer.speed) * 0.04;
 
-        if (racer.speed > maxSpeed)
-            racer.speed = maxSpeed;
-
-        // Small stamina effect near the end
-        if (racer.progress > TRACK_LENGTH * 0.70) {
-
-            racer.speed *=
-                0.9998 +
-                (racer.profile.stamina * 0.0002);
-
-        }
-
-        racer.progress += racer.speed * delta * 0.006;
+        // Move forward
+        racer.progress += racer.speed * delta * 0.08;
 
         if (racer.progress >= TRACK_LENGTH) {
 
             racer.progress = TRACK_LENGTH;
             racer.finished = true;
-            racer.finishMs = performance.now();
-
             finished++;
 
         }
+
+    });
+
+    const leaders = [...race.racers].sort(
+        (a, b) => b.progress - a.progress
+    );
+
+    updateGraphics();
+    updateLeaderboard(leaders);
+
+    leaderName.textContent =
+        rats[leaders[0].ratIndex].name;
+
+    if (finished === race.racers.length) {
+        finishRace();
+    }
+
+}        
 
     });
 
