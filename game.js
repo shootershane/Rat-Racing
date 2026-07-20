@@ -274,14 +274,15 @@ function updateRace(delta) {
 
     });
 
-    race.racers.sort((a,b)=>b.progress-a.progress);
+    const leaders = [...race.racers].sort(
+    (a, b) => b.progress - a.progress
+);
 
-    updateGraphics();
+updateGraphics();
+updateLeaderboard(leaders);
 
-    updateLeaderboard();
-
-    leaderName.textContent =
-        rats[race.racers[0].ratIndex].name;
+leaderName.textContent =
+    rats[leaders[0].ratIndex].name;
 
     if(finished===race.racers.length){
 
@@ -329,22 +330,22 @@ function updateGraphics(){
     });
 
 }
-function updateLeaderboard(){
+function updateLeaderboard(leaders){
 
-    leaderList.innerHTML="";
+    leaderList.innerHTML = "";
 
-    race.racers.forEach((racer,index)=>{
+    leaders.forEach((racer, index) => {
 
-        const li=document.createElement("li");
+        const li = document.createElement("li");
 
-        li.textContent=
-            `${index+1}. ${rats[racer.ratIndex].name}`;
+        li.textContent =
+            `${index + 1}. ${rats[racer.ratIndex].name}`;
 
         leaderList.appendChild(li);
 
     });
 
-}
+}}
 function finishRace(){
 
     race.running=false;
