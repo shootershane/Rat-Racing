@@ -91,7 +91,7 @@ function buildRatCards(){
 }
 console.log(rats.length);
 console.log(ratGrid);
-console.log("Part 1 loaded*);
+console.log("Part 1 loaded");
 buildRatCards();
 updateCounter();
 
