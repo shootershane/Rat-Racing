@@ -222,3 +222,157 @@ startRaceButton.addEventListener("click", () => {
 
 });
 
+// =====================================================
+// PART 3A - Race Engine
+// =====================================================
+
+function updateRace(delta) {
+
+    let finished = 0;
+
+    race.racers.forEach(racer => {
+
+        if (racer.finished) {
+            finished++;
+            return;
+        }
+
+        // Smooth performance multiplier
+        const variation =
+            0.985 +
+            Math.sin((performance.now() / 700) + racer.lane) * 0.015;
+
+        // Acceleration
+        racer.speed +=
+            racer.profile.acceleration *
+            delta *
+            0.012;
+
+        // Top speed cap
+        const maxSpeed =
+            racer.profile.topSpeed *
+            variation;
+
+        if (racer.speed > maxSpeed)
+            racer.speed = maxSpeed;
+
+        // Small stamina effect near the end
+        if (racer.progress > TRACK_LENGTH * 0.70) {
+
+            racer.speed *=
+                0.9998 +
+                (racer.profile.stamina * 0.0002);
+
+        }
+
+        racer.progress += racer.speed * delta * 0.05;
+
+        if (racer.progress >= TRACK_LENGTH) {
+
+            racer.progress = TRACK_LENGTH;
+            racer.finished = true;
+            racer.finishMs = performance.now();
+
+            finished++;
+
+        }
+
+    });
+
+    race.racers.sort((a,b)=>b.progress-a.progress);
+
+    updateGraphics();
+
+    updateLeaderboard();
+
+    leaderName.textContent =
+        rats[race.racers[0].ratIndex].name;
+
+    if(finished===race.racers.length){
+
+        finishRace();
+
+    }
+
+}
+let lastFrame = 0;
+
+function raceLoop(time){
+
+    if(!race.running) return;
+
+    if(!lastFrame)
+        lastFrame=time;
+
+    const delta=time-lastFrame;
+
+    lastFrame=time;
+
+    updateRace(delta);
+
+    race.animationId=
+        requestAnimationFrame(raceLoop);
+
+}
+function updateGraphics(){
+
+    race.racers.forEach(racer=>{
+
+        const runner=
+            document.getElementById(
+                `runner-${racer.lane}`
+            );
+
+        if(!runner) return;
+
+        const percent=
+            racer.progress/TRACK_LENGTH;
+
+        runner.style.left=
+            `${percent*94}%`;
+
+    });
+
+}
+function updateLeaderboard(){
+
+    leaderList.innerHTML="";
+
+    race.racers.forEach((racer,index)=>{
+
+        const li=document.createElement("li");
+
+        li.textContent=
+            `${index+1}. ${rats[racer.ratIndex].name}`;
+
+        leaderList.appendChild(li);
+
+    });
+
+}
+function finishRace(){
+
+    race.running=false;
+
+    cancelAnimationFrame(
+        race.animationId
+    );
+
+    const winner=race.racers[0];
+
+    setTimeout(()=>{
+
+        raceScreen.classList.add("hidden");
+
+        document
+            .getElementById("winnerName")
+            .textContent=
+            rats[winner.ratIndex].name;
+
+        document
+            .getElementById("winnerScreen")
+            .classList.remove("hidden");
+
+    },1000);
+
+}
