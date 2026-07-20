@@ -1,11 +1,12 @@
-// =====================================================
+// ======================================================
 // RAT RACING 2.0
-// PART 1
-// =====================================================
+// NEW GAME ENGINE
+// PART 1 - FOUNDATION
+// ======================================================
 
-// ----------------------------
-// RAT DATA
-// ----------------------------
+// ------------------------------------------------------
+// RAT ROSTER
+// ------------------------------------------------------
 
 const rats = [
     { name: "Cheddar", bio: "Cocky Champion" },
@@ -34,25 +35,19 @@ const rats = [
     { name: "Lucky", bio: "Feels Lucky" }
 ];
 
-// ----------------------------
+// ------------------------------------------------------
 // CONSTANTS
-// ----------------------------
+// ------------------------------------------------------
 
 const TRACK_LENGTH = 1000;
-const TARGET_RACE_TIME = 30000;
+const RACE_TIME = 30000;
+const RACERS_PER_RACE = 12;
 
 let selected = [];
 
-let race = {
-    running: false,
-    racers: [],
-    animationId: null,
-    startTime: 0
-};
-
-// ----------------------------
+// ------------------------------------------------------
 // DOM
-// ----------------------------
+// ------------------------------------------------------
 
 const ratGrid = document.getElementById("ratGrid");
 const selectedCount = document.getElementById("selectedCount");
@@ -60,20 +55,73 @@ const startRaceButton = document.getElementById("startRace");
 
 const selectionScreen = document.getElementById("selectionScreen");
 const raceScreen = document.getElementById("raceScreen");
+const winnerScreen = document.getElementById("winnerScreen");
 
 const trackArea = document.getElementById("trackArea");
+
 const leaderList = document.getElementById("leaderList");
 const leaderName = document.getElementById("leaderName");
 
-// ----------------------------
-// SELECTION
-// ----------------------------
+const winnerName = document.getElementById("winnerName");
+const raceAgainButton = document.getElementById("raceAgain");
+
+// ------------------------------------------------------
+// GAME STATE
+// ------------------------------------------------------
+
+const race = {
+
+    running: false,
+
+    racers: [],
+
+    animationId: null,
+
+    startTime: 0,
+
+    previousFrame: 0
+
+};
+
+// ------------------------------------------------------
+// HELPERS
+// ------------------------------------------------------
+
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+}
+
+function shuffle(array) {
+
+    const copy = [...array];
+
+    for (let i = copy.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+
+    }
+
+    return copy;
+
+}
+
+// ------------------------------------------------------
+// RAT SELECTION
+// ------------------------------------------------------
 
 function updateCounter() {
 
-    selectedCount.textContent = `${selected.length} / 12 Selected`;
+    selectedCount.textContent =
+        `${selected.length} / ${RACERS_PER_RACE} Selected`;
 
-    startRaceButton.disabled = selected.length !== 12;
+    startRaceButton.disabled =
+        selected.length !== RACERS_PER_RACE;
 
 }
 
@@ -84,13 +132,16 @@ function toggleRat(index, card) {
     if (existing >= 0) {
 
         selected.splice(existing, 1);
+
         card.classList.remove("selected");
 
     } else {
 
-        if (selected.length >= 12) return;
+        if (selected.length >= RACERS_PER_RACE)
+            return;
 
         selected.push(index);
+
         card.classList.add("selected");
 
     }
@@ -115,7 +166,11 @@ function buildRatCards() {
             <div class="ratBio">${rat.bio}</div>
         `;
 
-        card.onclick = () => toggleRat(index, card);
+        card.addEventListener("click", () => {
+
+            toggleRat(index, card);
+
+        });
 
         ratGrid.appendChild(card);
 
@@ -125,22 +180,13 @@ function buildRatCards() {
 
 buildRatCards();
 updateCounter();
-// ----------------------------
-// RACE PROFILE
-// ----------------------------
+// ======================================================
+// PART 2 - RACE SETUP
+// ======================================================
 
-function generateProfile() {
-
-    return {
-
-        acceleration: 0.85 + Math.random() * 0.15,
-        topSpeed: 28 + Math.random() * 4,
-        stamina: 0.85 + Math.random() * 0.15,
-        consistency: 0.85 + Math.random() * 0.15
-
-    };
-
-}
+// ------------------------------------------------------
+// CREATE RACERS
+// ------------------------------------------------------
 
 function createRace() {
 
@@ -153,13 +199,21 @@ function createRace() {
             lane,
             ratIndex,
 
-            profile: generateProfile(),
-
             progress: 0,
-            speed: 0,
 
-            finished: false,
-            finishMs: null
+            speed: random(7.5, 8.5),
+
+            targetSpeed: random(8, 10),
+
+            momentum: random(.85, 1.15),
+
+            surgeTimer: random(500,2500),
+
+            fatigue: 1,
+
+            finished:false,
+
+            finishTime:0
 
         });
 
@@ -167,32 +221,38 @@ function createRace() {
 
 }
 
-// =====================================================
-// PART 2 - Build Track & Start Race
-// =====================================================
+// ------------------------------------------------------
+// BUILD TRACK
+// ------------------------------------------------------
 
-// Build the race track
-function buildTrack() {
+function buildTrack(){
 
-    trackArea.innerHTML = "";
-    leaderList.innerHTML = "";
+    trackArea.innerHTML="";
+    leaderList.innerHTML="";
 
-    race.racers.forEach((racer) => {
+    race.racers.forEach(racer=>{
 
-        const lane = document.createElement("div");
-        lane.className = "trackLane";
+        const lane=document.createElement("div");
 
-        const runner = document.createElement("div");
-        runner.className = "runner";
-        runner.id = `runner-${racer.lane}`;
-        runner.textContent = "🐀";
+        lane.className="trackLane";
+
+        const runner=document.createElement("div");
+
+        runner.className="runner";
+
+        runner.id=`runner-${racer.lane}`;
+
+        runner.textContent="🐀";
 
         lane.appendChild(runner);
+
         trackArea.appendChild(lane);
 
-        const li = document.createElement("li");
-        li.id = `leader-${racer.lane}`;
-        li.textContent = rats[racer.ratIndex].name;
+        const li=document.createElement("li");
+
+        li.id=`leader-${racer.lane}`;
+
+        li.textContent=rats[racer.ratIndex].name;
 
         leaderList.appendChild(li);
 
@@ -200,111 +260,192 @@ function buildTrack() {
 
 }
 
-// Start race button
-startRaceButton.addEventListener("click", () => {
+// ------------------------------------------------------
+// START RACE
+// ------------------------------------------------------
 
-    if (selected.length !== 12) return;
+function startRace(){
 
     createRace();
+
     buildTrack();
 
     selectionScreen.classList.add("hidden");
+
+    winnerScreen.classList.add("hidden");
+
     raceScreen.classList.remove("hidden");
 
-    race.running = true;
-    lastFrame = 0;
+    race.running=true;
+
+    race.startTime=performance.now();
+
+    race.previousFrame=performance.now();
 
     requestAnimationFrame(raceLoop);
 
+}
+
+startRaceButton.addEventListener("click",()=>{
+
+    if(selected.length!==RACERS_PER_RACE)
+        return;
+
+    startRace();
+
 });
-// =====================================================
-// PART 3A - Race Engine
-// =====================================================
 
-function updateRace(delta) {
+// ======================================================
+// PART 3
+// RACE PHYSICS
+// ======================================================
 
-    let finished = 0;
+function updateRacer(racer,delta){
 
-    race.racers.forEach(racer => {
+    if(racer.finished)
+        return;
 
-        if (racer.finished) {
-            finished++;
-            return;
-        }
+    racer.surgeTimer-=delta;
 
-        // Random target speed (changes every frame)
-        const targetSpeed = 7 + Math.random() * 6;
+    // Every few seconds the rat picks a
+    // completely new desired pace.
 
-        // Smoothly move toward that speed
-        racer.speed += (targetSpeed - racer.speed) * 0.04;
+    if(racer.surgeTimer<=0){
 
-        // Move forward
-        racer.progress += racer.speed * delta * 0.08;
+        racer.targetSpeed=random(6.5,12);
 
-        if (racer.progress >= TRACK_LENGTH) {
+        racer.momentum=random(.90,1.10);
 
-            racer.progress = TRACK_LENGTH;
-            racer.finished = true;
-            finished++;
+        racer.surgeTimer=random(700,2400);
 
-        }
-
-    });
-
-    const leaders = [...race.racers].sort(
-        (a, b) => b.progress - a.progress
-    );
-
-    updateGraphics();
-    updateLeaderboard(leaders);
-
-    leaderName.textContent =
-        rats[leaders[0].ratIndex].name;
-
-    if (finished === race.racers.length) {
-        finishRace();
     }
 
-}        
+    // Last 20% of race everyone gets
+    // slightly more aggressive.
 
-    });
+    const percent=racer.progress/TRACK_LENGTH;
 
-    const leaders = [...race.racers].sort(
-    (a, b) => b.progress - a.progress
-);
+    if(percent>.80){
 
-updateGraphics();
-updateLeaderboard(leaders);
+        racer.targetSpeed+=random(.2,.8);
 
-leaderName.textContent =
-    rats[leaders[0].ratIndex].name;
+    }
 
-    if(finished===race.racers.length){
+    // Very small fatigue.
+    // Everyone receives the same formula.
 
-        finishRace();
+    racer.fatigue=
+        clamp(
+            1-(percent*.08),
+            .90,
+            1
+        );
+
+    // Smooth acceleration.
+
+    racer.speed+=
+        (
+            racer.targetSpeed-
+            racer.speed
+        )*.03;
+
+    // Apply momentum.
+
+    racer.speed*=racer.momentum;
+
+    // Apply fatigue.
+
+    racer.speed*=racer.fatigue;
+
+    // Tiny randomness every frame.
+
+    racer.speed+=random(-.08,.08);
+
+    racer.speed=
+        clamp(
+            racer.speed,
+            5,
+            13
+        );
+
+    racer.progress+=
+        racer.speed*
+        delta*
+        .075;
+
+    if(racer.progress>=TRACK_LENGTH){
+
+        racer.progress=TRACK_LENGTH;
+
+        racer.finished=true;
+
+        racer.finishTime=
+            performance.now()-
+            race.startTime;
 
     }
 
 }
-let lastFrame = 0;
+// ======================================================
+// PART 4 - RACE LOOP
+// ======================================================
 
-function raceLoop(time){
+function raceLoop(timestamp){
 
-    if(!race.running) return;
+    if(!race.running)
+        return;
 
-    if(!lastFrame)
-        lastFrame=time;
+    const delta =
+        timestamp - race.previousFrame;
 
-    const delta=time-lastFrame;
-
-    lastFrame=time;
+    race.previousFrame = timestamp;
 
     updateRace(delta);
 
-    race.animationId=
+    race.animationId =
         requestAnimationFrame(raceLoop);
 
 }
+
+// ------------------------------------------------------
+// UPDATE ENTIRE RACE
+// ------------------------------------------------------
+
+function updateRace(delta){
+
+    race.racers.forEach(racer=>{
+
+        updateRacer(racer,delta);
+
+    });
+
+    const leaders=[...race.racers].sort(
+
+        (a,b)=>b.progress-a.progress
+
+    );
+
+    updateGraphics();
+
+    updateLeaderboard(leaders);
+
+    leaderName.textContent=
+        rats[leaders[0].ratIndex].name;
+
+    if(
+        race.racers.every(
+            r=>r.finished
+        )
+    ){
+        finishRace();
+    }
+
+}
+
+// ======================================================
+// GRAPHICS
+// ======================================================
+
 function updateGraphics(){
 
     race.racers.forEach(racer=>{
@@ -314,33 +455,51 @@ function updateGraphics(){
                 `runner-${racer.lane}`
             );
 
-        if(!runner) return;
+        if(!runner)
+            return;
 
-        const percent=
-            racer.progress/TRACK_LENGTH;
+        const percent =
+            racer.progress /
+            TRACK_LENGTH;
 
-        runner.style.left=
+        runner.style.left =
             `${percent*94}%`;
 
     });
 
 }
+
+// ======================================================
+// LEADERBOARD
+// ======================================================
+
 function updateLeaderboard(leaders){
 
-    leaderList.innerHTML = "";
+    leaderList.innerHTML="";
 
-    leaders.forEach((racer, index) => {
+    leaders.forEach((racer,index)=>{
 
-        const li = document.createElement("li");
+        const li=document.createElement("li");
 
-        li.textContent =
-            `${index + 1}. ${rats[racer.ratIndex].name}`;
+        const percent=
+            (
+                racer.progress/
+                TRACK_LENGTH
+            )*100;
+
+        li.textContent=
+            `${index+1}. ${rats[racer.ratIndex].name} (${percent.toFixed(1)}%)`;
 
         leaderList.appendChild(li);
 
     });
 
 }
+
+// ======================================================
+// FINISH
+// ======================================================
+
 function finishRace(){
 
     race.running=false;
@@ -349,22 +508,82 @@ function finishRace(){
         race.animationId
     );
 
-    const winner = [...race.racers].sort(
-    (a, b) => b.progress - a.progress
-)[0];
+    const winner=[...race.racers].sort(
+
+        (a,b)=>
+
+            a.finishTime-
+            b.finishTime
+
+    )[0];
+
     setTimeout(()=>{
 
         raceScreen.classList.add("hidden");
 
-        document
-            .getElementById("winnerName")
-            .textContent=
+        winnerName.textContent=
             rats[winner.ratIndex].name;
 
-        document
-            .getElementById("winnerScreen")
-            .classList.remove("hidden");
+        winnerScreen.classList.remove(
+            "hidden"
+        );
 
-    },1000);
+    },1200);
 
 }
+
+// ======================================================
+// RESET
+// ======================================================
+
+function resetGame(){
+
+    race.running=false;
+
+    cancelAnimationFrame(
+        race.animationId
+    );
+
+    race.racers=[];
+
+    selected=[];
+
+    document
+        .querySelectorAll(".ratCard")
+        .forEach(card=>{
+
+            card.classList.remove(
+                "selected"
+            );
+
+        });
+
+    updateCounter();
+
+    leaderList.innerHTML="";
+
+    leaderName.textContent="---";
+
+    trackArea.innerHTML="";
+
+    winnerScreen.classList.add(
+        "hidden"
+    );
+
+    raceScreen.classList.add(
+        "hidden"
+    );
+
+    selectionScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+raceAgainButton.addEventListener(
+
+    "click",
+
+    resetGame
+
+);
