@@ -193,13 +193,19 @@ function startRace() {
         racers.forEach(racer => {
 
             // Smooth acceleration/deceleration
-            const targetSpeed = 1 + Math.random() * 1.2;
-            racer.speed += (targetSpeed - racer.speed) * 0.08;
-            
+            const targetSpeed = 1.1 + Math.random() * 0.5;
 
-            racer.position += racer.speed;
+// Smoothly accelerate toward the target speed
+racer.speed += (targetSpeed - racer.speed) * 0.03;
 
-            if (racer.position > 100)
+// Tiny random burst to keep the race exciting
+racer.speed += (Math.random() - 0.5) * 0.03;
+
+// Keep speeds realistic
+if (racer.speed < 0.8) racer.speed = 0.8;
+if (racer.speed > 1.8) racer.speed = 1.8;
+
+racer.position += racer.speed;            if (racer.position > 100)
                 racer.position = 100;
 
             document.getElementById("runner" + racer.lane).style.left =
