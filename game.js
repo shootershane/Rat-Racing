@@ -168,7 +168,7 @@ function buildTrack() {
 // =====================================================
 // RAT RACING
 // GAME.JS - PART 3
-// Improved Race Engine
+// Dynamic Race Engine
 // =====================================================
 
 let raceInterval = null;
@@ -187,32 +187,27 @@ function startRace() {
     const racers = selected.map((ratIndex, lane) => ({
         lane,
         position: 0,
-        speed: 1 + Math.random(),
-        targetSpeed: 1 + Math.random()
+        speed: 2 + Math.random()
     }));
 
     raceInterval = setInterval(() => {
 
         racers.forEach(racer => {
 
-            // Occasionally pick a new pace
-            if (Math.random() < 0.03) {
-                racer.targetSpeed = 0.8 + Math.random() * 2.4;
-            }
+            // Random burst or slowdown
+            racer.speed += (Math.random() - 0.48) * 0.35;
 
-            // Smooth acceleration
-            racer.speed += (racer.targetSpeed - racer.speed) * 0.08;
+            // Keep speeds reasonable
+            if (racer.speed < 0.5) racer.speed = 0.5;
+            if (racer.speed > 4.5) racer.speed = 4.5;
 
-            // Tiny random burst
-            racer.speed += (Math.random() - 0.5) * 0.04;
-
-            // Clamp speeds
-            if (racer.speed < 0.7) racer.speed = 0.7;
-            if (racer.speed > 3.0) racer.speed = 3.0;
-
-            // Move
+            // Move forward
             racer.position += racer.speed;
 
+            // Gradually reduce bursts
+            racer.speed *= 0.97;
+
+            // Don't pass finish line
             if (racer.position > finish) {
                 racer.position = finish;
             }
@@ -225,9 +220,10 @@ function startRace() {
 
         });
 
-        // Leaderboard
+        // Sort racers by position
         const standings = [...racers].sort((a, b) => b.position - a.position);
 
+        // Update leaderboard
         leaderList.innerHTML = "";
 
         standings.forEach((racer, place) => {
@@ -240,10 +236,11 @@ function startRace() {
 
         });
 
+        // Update TV leader
         document.getElementById("leaderName").textContent =
             rats[selected[standings[0].lane]].name;
 
-        // Finish
+        // Finish race
         if (standings[0].position >= finish) {
 
             clearInterval(raceInterval);
@@ -252,7 +249,7 @@ function startRace() {
 
                 alert(
                     "🏆 " +
-                    rats[selected[standings[0].lane]].name +
+                    rats[selected[standings[0].lane]].name] +
                     " Wins!"
                 );
 
@@ -265,3 +262,6 @@ function startRace() {
 }
 
 startRaceButton.addEventListener("click", startRace);
+
+
+Sent from Yahoo Mail for iPhone
