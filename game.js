@@ -167,7 +167,7 @@ function buildTrack() {
 // ---------- REPLACE START BUTTON ----------
 
 // Remove the old click event
-startRaceButton.removeEventListener("click", startRace);
+
 
 // New start function
 function startRace() {
