@@ -181,3 +181,92 @@ function startRace() {
 
 // Add new click event
 startRaceButton.addEventListener("click", startRace);
+// =====================================================
+// RAT RACING
+// GAME.JS - PART 3
+// Race Engine
+// =====================================================
+
+let raceInterval = null;
+let raceFinished = false;
+
+function startRace() {
+
+    selectionScreen.classList.add("hidden");
+    raceScreen.classList.remove("hidden");
+
+    buildTrack();
+
+    raceFinished = false;
+
+    const positions = [];
+
+    for (let i = 0; i < selected.length; i++) {
+        positions.push(0);
+    }
+
+    raceInterval = setInterval(function () {
+
+        if (raceFinished) return;
+
+        // Move every rat
+        selected.forEach((ratIndex, lane) => {
+
+            const runner = document.getElementById("runner" + lane);
+
+            // Random movement
+            positions[lane] += Math.random() * 6;
+
+            if (positions[lane] > 100)
+                positions[lane] = 100;
+
+            runner.style.left = positions[lane] + "%";
+
+        });
+
+        // Live leaderboard
+        const standings = positions
+            .map((distance, lane) => ({
+                lane,
+                distance
+            }))
+            .sort((a, b) => b.distance - a.distance);
+
+        leaderList.innerHTML = "";
+
+        standings.forEach((entry, place) => {
+
+            const rat =
+                rats[selected[entry.lane]];
+
+            const item =
+                document.createElement("li");
+
+            item.textContent =
+                (place + 1) + ". " + rat.name;
+
+            leaderList.appendChild(item);
+
+        });
+
+        // Winner
+        const winner =
+            standings[0];
+
+        if (winner.distance >= 100) {
+
+            raceFinished = true;
+
+            clearInterval(raceInterval);
+
+            const winningRat =
+                rats[selected[winner.lane]];
+
+            alert("🏆 " + winningRat.name + " wins!");
+
+        }
+
+    }, 60);
+
+}
+
