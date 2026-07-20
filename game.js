@@ -206,12 +206,15 @@ if (racer.speed < 0.8) racer.speed = 0.8;
 if (racer.speed > 1.8) racer.speed = 1.8;
 
 racer.position += racer.speed;
-            if (racer.position > 100) {
-                racer.position = 100;
-            }
 
-            document.getElementById("runner" + racer.lane).style.left =
-                racer.position + "%";
+const finish = trackArea.clientWidth - 80;
+
+if (racer.position > finish) {
+    racer.position = finish;
+}
+
+document.getElementById("runner" + racer.lane).style.left =
+    racer.position + "px";
         });
 
         racers.sort((a, b) => b.position - a.position);
