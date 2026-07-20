@@ -109,15 +109,6 @@ function buildRatCards() {
 
 }
 
-// ---------- START BUTTON ----------
-
-function startRace() {
-
-    alert("Race engine coming in Part 2.");
-
-}
-
-startRaceButton.addEventListener("click", startRace);
 
 // ---------- START GAME ----------
 
