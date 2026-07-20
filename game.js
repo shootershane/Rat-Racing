@@ -123,9 +123,15 @@ function buildRatCards() {
 
 }
 
-buildRatCards();
-updateCounter();
+console.log("ratGrid:", ratGrid);
+console.log("rats:", rats);
+console.log("rats length:", rats.length);
 
+buildRatCards();
+
+console.log("Cards created:", ratGrid.children.length);
+
+updateCounter();
 // ----------------------------
 // RACE PROFILE
 // ----------------------------
