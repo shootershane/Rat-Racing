@@ -193,8 +193,8 @@ function startRace() {
         racers.forEach(racer => {
 
             // Smooth acceleration/deceleration
-            const targetspeed = 1 + Math .random() * 1.2;
-            racer.speed += (targetspeed - racer.speed) * 0.08;
+            const targetSpeed = 1 + Math .random() * 1.2;
+            racer.speed += (targetSpeed - racer.speed) * 0.08;
             
 
             racer.position += racer.speed;
