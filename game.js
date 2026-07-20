@@ -345,7 +345,7 @@ function updateLeaderboard(leaders){
 
     });
 
-}}
+}
 function finishRace(){
 
     race.running=false;
