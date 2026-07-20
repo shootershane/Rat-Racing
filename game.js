@@ -203,25 +203,20 @@ function buildTrack() {
 // Start race button
 startRaceButton.addEventListener("click", () => {
 
-    console.log("START BUTTON CLICKED");
-
-    console.log("Selected:", selected.length);
+    if (selected.length !== 12) return;
 
     createRace();
-
-    console.log("Race created:", race.racers.length);
-
     buildTrack();
-
-    console.log("Track built");
 
     selectionScreen.classList.add("hidden");
     raceScreen.classList.remove("hidden");
 
-    console.log("Switched screens");
+    race.running = true;
+    lastFrame = 0;
+
+    requestAnimationFrame(raceLoop);
 
 });
-
 // =====================================================
 // PART 3A - Race Engine
 // =====================================================
