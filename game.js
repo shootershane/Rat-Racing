@@ -221,7 +221,4 @@ startRaceButton.addEventListener("click", () => {
     console.log("Switched screens");
 
 });
-    // Part 3 starts the animation.
-    // We'll call startRace() here later.
 
-});
