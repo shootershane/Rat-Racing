@@ -199,7 +199,7 @@ function startRace() {
             const runner = document.getElementById("runner" + lane);
 
             // Random movement
-            positions[lane] += Math.random() * 6;
+            positions[lane] += Math.random() * 1.5;
 
             if (positions[lane] > 100)
                 positions[lane] = 100;
@@ -250,7 +250,7 @@ function startRace() {
 
         }
 
-    }, 60);
+    }, 80);
 
 }
 startRaceButton.addEventListener("click", startRace);
