@@ -203,14 +203,24 @@ function buildTrack() {
 // Start race button
 startRaceButton.addEventListener("click", () => {
 
-    if (selected.length !== 12) return;
+    console.log("START BUTTON CLICKED");
+
+    console.log("Selected:", selected.length);
 
     createRace();
+
+    console.log("Race created:", race.racers.length);
+
     buildTrack();
+
+    console.log("Track built");
 
     selectionScreen.classList.add("hidden");
     raceScreen.classList.remove("hidden");
 
+    console.log("Switched screens");
+
+});
     // Part 3 starts the animation.
     // We'll call startRace() here later.
 
