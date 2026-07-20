@@ -249,7 +249,7 @@ function startRace() {
 
                 alert(
                     "🏆 " +
-                    rats[selected[standings[0].lane]].name] +
+                    rats[selected[standings[0].lane]].name +
                     " Wins!"
                 );
 
