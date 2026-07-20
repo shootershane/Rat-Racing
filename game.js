@@ -148,7 +148,8 @@ function buildTrack() {
         runner.className = "runner";
         runner.id = "runner" + lane;
 
-        runner.textContent = "🐀 " + rat.name;
+        runner.textContent = "🐀 ";
+        runner.title = rat.name;
 
         laneDiv.appendChild(runner);
         trackArea.appendChild(laneDiv);
@@ -192,10 +193,9 @@ function startRace() {
         racers.forEach(racer => {
 
             // Smooth acceleration/deceleration
-            racer.speed += (Math.random() - 0.45) * 0.25;
-
-            if (racer.speed < 0.3) racer.speed = 0.3;
-            if (racer.speed > 2.4) racer.speed = 2.4;
+            const targetspeed = 1 + Math .random() * 1.2;
+            racer.speed += (targetspeed - racer.speed) * 0.08;
+            
 
             racer.position += racer.speed;
 
