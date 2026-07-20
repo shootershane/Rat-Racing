@@ -233,10 +233,8 @@ function updateRace(delta) {
         }
 
         // Smooth performance multiplier
-        const variation =
-            0.985 +
-            Math.sin((performance.now() / 700) + racer.lane) * 0.015;
-
+       const variation =
+    0.90 + Math.random() * 0.20;
         // Acceleration
         racer.speed +=
             racer.profile.acceleration *
@@ -260,7 +258,7 @@ function updateRace(delta) {
 
         }
 
-        racer.progress += racer.speed * delta * 0.05;
+        racer.progress += racer.speed * delta * 0.006;
 
         if (racer.progress >= TRACK_LENGTH) {
 
