@@ -179,6 +179,7 @@ function startRace() {
     raceScreen.classList.remove("hidden");
 
     buildTrack();
+    console.log(document.getElementById("runner0"))
 
     clearInterval(raceInterval);
 
