@@ -244,7 +244,7 @@ racer.position += racer.speed;            if (racer.position > 100)
 
         }
 
-    }, 30);
+    }, 16);
 
 }
 
