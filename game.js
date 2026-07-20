@@ -371,7 +371,7 @@ function updateRacer(racer,delta){
     racer.progress+=
         racer.speed*
         delta*
-        .075;
+        .01;
 
     if(racer.progress>=TRACK_LENGTH){
 
