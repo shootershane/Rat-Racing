@@ -28,6 +28,7 @@ const rats = [
 const selected = [];
 
 const grid = document.getElementById("ratGrid");
+console.log(grid);
 const counter = document.getElementById("selectedCount");
 const startButton = document.getElementById("startRace");
 
