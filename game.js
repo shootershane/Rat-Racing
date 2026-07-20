@@ -164,15 +164,13 @@ function buildTrack() {
 
 }
 
-
 // =====================================================
 // RAT RACING
 // GAME.JS - PART 3
-// Race Engine
+// Smooth Race Engine
 // =====================================================
 
 let raceInterval = null;
-let raceFinished = false;
 
 function startRace() {
 
@@ -181,76 +179,68 @@ function startRace() {
 
     buildTrack();
 
-    raceFinished = false;
+    clearInterval(raceInterval);
 
-    const positions = [];
+    const racers = selected.map((ratIndex, lane) => ({
+        lane,
+        speed: 0,
+        position: 0
+    }));
 
-    for (let i = 0; i < selected.length; i++) {
-        positions.push(0);
-    }
+    raceInterval = setInterval(() => {
 
-    raceInterval = setInterval(function () {
+        racers.forEach(racer => {
 
-        if (raceFinished) return;
+            // Smooth acceleration/deceleration
+            racer.speed += (Math.random() - 0.45) * 0.25;
 
-        // Move every rat
-        selected.forEach((ratIndex, lane) => {
+            if (racer.speed < 0.3) racer.speed = 0.3;
+            if (racer.speed > 2.4) racer.speed = 2.4;
 
-            const runner = document.getElementById("runner" + lane);
+            racer.position += racer.speed;
 
-            // Random movement
-            positions[lane] += Math.random() * 1.5;
+            if (racer.position > 100)
+                racer.position = 100;
 
-            if (positions[lane] > 100)
-                positions[lane] = 100;
-
-            runner.style.left = positions[lane] + "%";
-
+            document.getElementById("runner" + racer.lane).style.left =
+                racer.position + "%";
         });
 
-        // Live leaderboard
-        const standings = positions
-            .map((distance, lane) => ({
-                lane,
-                distance
-            }))
-            .sort((a, b) => b.distance - a.distance);
+        racers.sort((a, b) => b.position - a.position);
 
         leaderList.innerHTML = "";
 
-        standings.forEach((entry, place) => {
+        racers.forEach((racer, place) => {
 
-            const rat =
-                rats[selected[entry.lane]];
+            const li = document.createElement("li");
 
-            const item =
-                document.createElement("li");
+            li.textContent =
+                `${place + 1}. ${rats[selected[racer.lane]].name}`;
 
-            item.textContent =
-                (place + 1) + ". " + rat.name;
-
-            leaderList.appendChild(item);
+            leaderList.appendChild(li);
 
         });
 
-        // Winner
-        const winner =
-            standings[0];
+        document.getElementById("leaderName").textContent =
+            rats[selected[racers[0].lane]].name;
 
-        if (winner.distance >= 100) {
-
-            raceFinished = true;
+        if (racers[0].position >= 100) {
 
             clearInterval(raceInterval);
 
-            const winningRat =
-                rats[selected[winner.lane]];
+            setTimeout(() => {
 
-            alert("🏆 " + winningRat.name + " wins!");
+                alert("🏆 " +
+                    rats[selected[racers[0].lane]].name +
+                    " Wins!");
+
+            }, 300);
 
         }
 
-    }, 80);
+    }, 30);
 
 }
+
 startRaceButton.addEventListener("click", startRace);
+
