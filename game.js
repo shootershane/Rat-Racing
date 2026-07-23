@@ -555,10 +555,10 @@ function beginRace() {
 console.log("Milestone 3 Loaded");
 // ======================================================
 // MILESTONE 5 - RACE ENGINE
-// PART 1 - FOUNDATION
+// PART 1
 // ======================================================
 
-const RACE_DURATION = 30; // Target race length (seconds)
+const RACE_DURATION = 30;
 
 function randomBetween(min, max) {
     return Math.random() * (max - min) + min;
@@ -567,32 +567,46 @@ function randomBetween(min, max) {
 function initializeRaceEngine() {
 
     Game.results = [];
-    Game.raceFinished = false;
     Game.raceStarted = false;
+    Game.raceFinished = false;
     Game.raceTime = 0;
 
-    Game.countdown = 3;
+    Game.countdownStart = null;
     Game.lastFrame = 0;
-    Game.lastCountdown = performance.now();
+    Game.phase = "start";
 
     Game.racers.forEach(rat => {
 
-        // Every race gets fresh hidden stats
-        rat.reaction = randomBetween(0.0, 0.7);
-        rat.acceleration = randomBetween(0.12, 0.20);
-        rat.topSpeed = randomBetween(34, 39);
-
-        rat.endurance = randomBetween(0.94, 1.04);
-        rat.sprint = randomBetween(1.03, 1.12);
-        rat.consistency = randomBetween(0.96, 1.04);
-
-        rat.progress = 0;
+        rat.distance = 0;
         rat.speed = 0;
+
         rat.finished = false;
         rat.finishTime = null;
 
-        rat.phase = "waiting";
-        rat.eventCooldown = randomBetween(1.5, 4);
+        rat.started = false;
+
+        rat.reactionDelay = randomBetween(0.05,0.80);
+
+        rat.acceleration =
+            randomBetween(11,17);
+
+        rat.baseSpeed =
+            randomBetween(27,31);
+
+        rat.maxSpeed =
+            randomBetween(35,40);
+
+        rat.energy =
+            randomBetween(94,106);
+
+        rat.consistency =
+            randomBetween(0.97,1.03);
+
+        rat.sprint =
+            randomBetween(1.04,1.12);
+
+        rat.eventTimer =
+            randomBetween(2,5);
 
     });
 
@@ -601,42 +615,446 @@ function initializeRaceEngine() {
     requestAnimationFrame(countdownLoop);
 
 }
+
 // ======================================================
 // COUNTDOWN
 // ======================================================
 
 function countdownLoop(timestamp) {
 
-    if (timestamp - Game.lastCountdown >= 1000) {
+    if (!Game.countdownStart) {
 
-        Game.countdown--;
+        Game.countdownStart = timestamp;
 
-        Game.lastCountdown = timestamp;
-
-        if (Game.countdown > 0) {
-
-            raceClock.textContent = Game.countdown;
-
-        }
-        else if (Game.countdown === 0) {
-
-            raceClock.textContent = "GO!";
-
-        }
-        else {
-
-            Game.raceStarted = true;
-
-            Game.lastFrame = performance.now();
-
-            requestAnimationFrame(raceLoop);
-
-            return;
-
-        }
+        Game.lastCountdown = 3;
 
     }
 
-    requestAnimationFrame(countdownLoop);
+    const elapsed =
+        (timestamp - Game.countdownStart) / 1000;
+
+    const count =
+        Math.ceil(3 - elapsed);
+
+    if (count > 0) {
+
+        if (count !== Game.lastCountdown) {
+
+            Game.lastCountdown = count;
+
+            raceClock.textContent = count;
+
+        }
+
+        requestAnimationFrame(countdownLoop);
+
+        return;
+
+    }
+
+    raceClock.textContent = "GO!";
+
+    setTimeout(() => {
+
+        Game.raceStarted = true;
+
+        Game.lastFrame = performance.now();
+
+        requestAnimationFrame(raceLoop);
+
+    },500);
 
 }
+
+// ======================================================
+// MAIN RACE LOOP
+// ======================================================
+
+function raceLoop(timestamp) {
+
+    if (Game.raceFinished)
+        return;
+
+    const delta =
+        (timestamp - Game.lastFrame) / 1000;
+
+    Game.lastFrame = timestamp;
+
+    Game.raceTime += delta;
+
+    raceClock.textContent =
+        Game.raceTime.toFixed(2);
+
+    updateRacePhase();
+
+    updateRacers(delta);
+
+    updateLeaderboard();
+
+    updateTrackSprites();
+
+    checkForFinish();
+
+    if (!Game.raceFinished) {
+
+        requestAnimationFrame(raceLoop);
+
+    }
+
+}
+
+// ======================================================
+// RACE PHASE
+// ======================================================
+
+function updateRacePhase() {
+
+    const percent =
+        Game.raceTime / RACE_DURATION;
+
+    if (percent < .25) {
+
+        Game.phase = "start";
+
+    }
+    else if (percent < .75) {
+
+        Game.phase = "middle";
+
+    }
+    else {
+
+        Game.phase = "finish";
+
+    }
+
+}
+
+// ======================================================
+// UPDATE RACERS
+// ======================================================
+
+function updateRacers(delta) {
+
+    Game.racers.forEach(rat => {
+
+        if (rat.finished)
+            return;
+
+        if (!rat.started) {
+
+            if (Game.raceTime < rat.reactionDelay)
+                return;
+
+            rat.started = true;
+
+        }
+
+        rat.speed +=
+            rat.acceleration * delta;
+
+        if (rat.speed > rat.baseSpeed) {
+
+            rat.speed = rat.baseSpeed;
+
+        }
+
+        rat.eventTimer -= delta;
+
+        if (rat.eventTimer <= 0) {
+
+            rat.eventTimer =
+                randomBetween(2.5,6);
+
+            if (Math.random() < .25) {
+
+                rat.speed *=
+                    randomBetween(.80,.92);
+
+            }
+            else {
+
+                rat.speed +=
+                    randomBetween(1,3);
+
+            }
+
+        }
+
+        if (Game.phase === "finish") {
+
+            rat.speed *= rat.sprint;
+
+        }
+
+        rat.speed *= rat.consistency;
+
+        rat.distance +=
+            rat.speed * delta;
+
+        if (rat.distance >= TRACK_LENGTH) {
+
+            rat.distance = TRACK_LENGTH;
+
+            rat.finished = true;
+
+            rat.finishTime =
+                Game.raceTime;
+
+            Game.results.push(rat);
+
+        }
+
+    });
+
+}
+// ======================================================
+// UPDATE TRACK SPRITES
+// ======================================================
+
+function updateTrackSprites() {
+
+    const sprites =
+        document.querySelectorAll(".ratSprite");
+
+    const laneWidth =
+        trackContainer.querySelector(".laneTrack")
+            ?.clientWidth || 900;
+
+    Game.racers.forEach(rat => {
+
+        const sprite =
+            document.querySelector(
+                `[data-rat="${rat.id}"]`
+            );
+
+        if (!sprite)
+            return;
+
+        const x =
+            (rat.distance / TRACK_LENGTH) *
+            (laneWidth - 40);
+
+        sprite.style.transform =
+            `translateX(${x}px)`;
+
+    });
+
+}
+
+// ======================================================
+// CHECK FOR FINISH
+// ======================================================
+
+function checkForFinish() {
+
+    if (Game.results.length <
+        Game.racers.length)
+        return;
+
+    finishRace();
+
+}
+
+// ======================================================
+// FINISH RACE
+// ======================================================
+
+function finishRace() {
+
+    Game.raceFinished = true;
+    Game.raceStarted = false;
+
+    Game.results.sort(
+
+        (a,b)=>
+            a.finishTime-b.finishTime
+
+    );
+
+    leaderName.textContent =
+        `🏆 ${Game.results[0].name}`;
+
+    raceClock.textContent =
+        Game.results[0].finishTime.toFixed(2);
+
+    console.clear();
+
+    console.table(
+
+        Game.results.map((rat,index)=>({
+
+            Place:index+1,
+            Rat:rat.name,
+            Time:rat.finishTime.toFixed(2)
+
+        }))
+
+    );
+
+}
+
+// ======================================================
+// RACE AGAIN
+// ======================================================
+
+function resetRaceEngine() {
+
+    Game.results=[];
+
+    Game.raceStarted=false;
+
+    Game.raceFinished=false;
+
+    Game.raceTime=0;
+
+    Game.lastFrame=0;
+
+    Game.countdownStart=null;
+
+    Game.racers.forEach(rat=>{
+
+        rat.distance=0;
+
+        rat.speed=0;
+
+        rat.finished=false;
+
+        rat.finishTime=null;
+
+        rat.started=false;
+
+    });
+
+    buildTrack();
+
+    buildLeaderboard();
+
+    initializeRaceEngine();
+
+}
+
+// ======================================================
+// DEBUG
+// ======================================================
+
+window.resetRaceEngine =
+    resetRaceEngine;
+
+console.log(
+    "Milestone 5 Loaded"
+);
+// ======================================================
+// OPTIONAL COMMENTARY
+// ======================================================
+
+const COMMENTARY = [
+
+    "A great break from the gate!",
+    "They're packed together!",
+    "Someone is making a move!",
+    "Huge burst of speed!",
+    "The leader is under pressure!",
+    "What a race!",
+    "They're flying down the stretch!",
+    "This one is going to be close!",
+    "A late charge!",
+    "Photo finish incoming!"
+
+];
+
+let commentaryTimer = 0;
+
+function updateCommentary(delta) {
+
+    commentaryTimer -= delta;
+
+    if (commentaryTimer > 0)
+        return;
+
+    commentaryTimer =
+        randomBetween(3,6);
+
+    const log =
+        document.getElementById("commentaryLog");
+
+    if (!log)
+        return;
+
+    const leaders =
+        [...Game.racers]
+        .sort((a,b)=>b.distance-a.distance);
+
+    const leader =
+        leaders[0];
+
+    const message =
+        COMMENTARY[
+            Math.floor(
+                Math.random()*COMMENTARY.length
+            )
+        ];
+
+    const line =
+        document.createElement("div");
+
+    line.textContent =
+        `${leader.name}: ${message}`;
+
+    log.prepend(line);
+
+    while (log.children.length > 8) {
+
+        log.removeChild(
+            log.lastChild
+        );
+
+    }
+
+}
+
+// ======================================================
+// MODIFY RACE LOOP
+// ======================================================
+//
+// Inside raceLoop(),
+// insert this line immediately after:
+//
+// updateRacers(delta);
+//
+//
+// updateCommentary(delta);
+//
+// ======================================================
+// RACE RESULTS TABLE
+// ======================================================
+
+function printResults() {
+
+    console.group("Race Results");
+
+    Game.results.forEach((rat,index)=>{
+
+        console.log(
+
+            `${index+1}. ${rat.name}  (${rat.finishTime.toFixed(2)}s)`
+
+        );
+
+    });
+
+    console.groupEnd();
+
+}
+
+// ======================================================
+// UPDATE finishRace()
+// ======================================================
+//
+// Add this line at the END of finishRace():
+//
+// printResults();
+//
+// ======================================================
+
+console.log("Race Engine Complete");
