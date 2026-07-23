@@ -43,30 +43,30 @@ const Game = {
 
 const RAT_DATABASE = [
 
-    { id: 1, name: "Cheddar" },
-    { id: 2, name: "Rocket" },
-    { id: 3, name: "Pizza Pete" },
-    { id: 4, name: "Peanut" },
-    { id: 5, name: "Cowboy Jack" },
-    { id: 6, name: "Captain Whiskers" },
-    { id: 7, name: "Shadow" },
-    { id: 8, name: "King Gouda" },
-    { id: 9, name: "Chef Alfredo" },
-    { id: 10, name: "Professor Pip" },
-    { id: 11, name: "Tank" },
-    { id: 12, name: "Slick" },
-    { id: 13, name: "Ace" },
-    { id: 14, name: "Rusty" },
-    { id: 15, name: "Sparky" },
-    { id: 16, name: "Turbo" },
-    { id: 17, name: "Riff" },
-    { id: 18, name: "Sergeant Squeak" },
-    { id: 19, name: "Taco" },
-    { id: 20, name: "Donut" },
-    { id: 21, name: "Bubbles" },
-    { id: 22, name: "Dusty" },
-    { id: 23, name: "Magnet" },
-    { id: 24, name: "Lucky" }
+    { id: 1, name: "Cheddar", emoji: "🧀" },
+    { id: 2, name: "Rocket", emoji: "🚀" },
+    { id: 3, name: "Pizza Pete", emoji: "🍕" },
+    { id: 4, name: "Peanut", emoji: "🥜" },
+    { id: 5, name: "Cowboy Jack", emoji: "🤠" },
+    { id: 6, name: "Captain Whiskers", emoji: "🎩" },
+    { id: 7, name: "Shadow", emoji: "🌑" },
+    { id: 8, name: "King Gouda", emoji: "👑" },
+    { id: 9, name: "Chef Alfredo", emoji: "👨‍🍳" },
+    { id: 10, name: "Professor Pip", emoji: "🎓" },
+    { id: 11, name: "Tank", emoji: "💪" },
+    { id: 12, name: "Slick", emoji: "😎" },
+    { id: 13, name: "Ace", emoji: "♠️" },
+    { id: 14, name: "Rusty", emoji: "🔧" },
+    { id: 15, name: "Sparky", emoji: "⚡" },
+    { id: 16, name: "Turbo", emoji: "🏎️" },
+    { id: 17, name: "Riff", emoji: "🎸" },
+    { id: 18, name: "Sergeant Squeak", emoji: "🪖" },
+    { id: 19, name: "Taco", emoji: "🌮" },
+    { id: 20, name: "Donut", emoji: "🍩" },
+    { id: 21, name: "Bubbles", emoji: "🫧" },
+    { id: 22, name: "Dusty", emoji: "🌪️" },
+    { id: 23, name: "Magnet", emoji: "🧲" },
+    { id: 24, name: "Lucky", emoji: "🍀" }
 
 ];
 
@@ -359,57 +359,51 @@ function assignRandomLanes() {
 // ======================================================
 // BUILD TRACK
 // ======================================================
-function startRace() {
+function buildTrack() {
 
-    Game.racers = [];
-    Game.results = [];
+    trackContainer.innerHTML = "";
 
-    Game.raceStarted = false;
-    Game.raceFinished = false;
-    Game.raceTime = 0;
+    const racers = [...Game.racers];
 
-    Game.selectedRats.forEach(id => {
+    racers.sort((a, b) => a.lane - b.lane);
 
-        const rat =
-            RAT_DATABASE.find(r => r.id === id);
+    racers.forEach(rat => {
 
-        Game.racers.push({
+        const lane = document.createElement("div");
 
-            id: rat.id,
+        lane.className = "trackLane";
 
-            name: rat.name,
+        lane.innerHTML = `
 
-            emoji: rat.emoji,
+<div class="laneLabel">
 
-            lane: 0,
+    <div class="laneNumber">
+        ${rat.lane}
+    </div>
 
-            distance: 0,
+    <div class="laneName">
+        ${rat.emoji} ${rat.name}
+    </div>
 
-            speed: 0,
+</div>
 
-            acceleration: 0,
+<div class="laneTrack">
 
-            finished: false,
+    <div
+        class="ratSprite"
+        data-rat="${rat.id}">
 
-            finishTime: null
+        🐀
 
-        });
+    </div>
+
+</div>
+
+`;
+
+        trackContainer.appendChild(lane);
 
     });
-
-    assignRandomLanes();
-
-    buildTrack();
-
-    buildLeaderboard();
-
-    draftScreen.classList.add("hidden");
-
-    raceScreen.classList.remove("hidden");
-
-    prepareRace();
-
-    initializeRaceEngine();
 
 }
 
