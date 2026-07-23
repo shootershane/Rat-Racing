@@ -277,18 +277,16 @@ function updateDraftUI() {
 }
 // ======================================================
 // START RACE
+// (Milestone 4)
 // ======================================================
 
 function startRace() {
 
     Game.racers = [];
-
     Game.results = [];
 
     Game.raceStarted = false;
-
     Game.raceFinished = false;
-
     Game.raceTime = 0;
 
     Game.selectedRats.forEach(id => {
@@ -298,17 +296,21 @@ function startRace() {
         Game.racers.push({
 
             id: rat.id,
-
             name: rat.name,
 
             lane: 0,
 
             distance: 0,
-
             speed: 0,
+            targetSpeed: 0,
+
+            acceleration: 0,
+            topSpeed: 0,
+            consistency: 0,
+            burst: 0,
+            stamina: 0,
 
             finished: false,
-
             finishTime: null
 
         });
@@ -325,16 +327,11 @@ function startRace() {
 
     raceScreen.classList.remove("hidden");
 
-    raceClock.textContent = "0.00";
+    prepareRace();
 
-    distanceRemaining.textContent = TRACK_LENGTH;
-
-    leaderName.textContent = "--";
-
-    console.table(Game.racers);
+    initializeRaceEngine();
 
 }
-
 // ======================================================
 // ASSIGN RANDOM LANES
 // ======================================================
@@ -556,3 +553,78 @@ function beginRace() {
 // ======================================================
 
 console.log("Milestone 3 Loaded");
+// ======================================================
+// INITIALIZE RACE ENGINE
+// ======================================================
+
+function initializeRaceEngine() {
+
+    Game.racers.forEach(rat => {
+
+        rat.acceleration = randomBetween(0.05, 0.10);
+
+        rat.topSpeed = randomBetween(4.5, 6.3);
+
+        rat.consistency = randomBetween(0.90, 1.10);
+
+        rat.burst = randomBetween(0.95, 1.20);
+
+        rat.stamina = randomBetween(0.85, 1.00);
+
+        rat.targetSpeed = rat.topSpeed;
+
+        rat.speed = 0;
+
+        rat.distance = 0;
+
+    });
+
+    Game.lastFrame = performance.now();
+
+    Game.raceStarted = true;
+
+    requestAnimationFrame(raceLoop);
+
+}
+
+// ======================================================
+// RANDOM NUMBER
+// ======================================================
+
+function randomBetween(min, max) {
+
+    return Math.random() * (max - min) + min;
+
+}
+
+// ======================================================
+// RACE LOOP
+// ======================================================
+
+function raceLoop(timestamp) {
+
+    if (!Game.raceStarted)
+        return;
+
+    const delta = (timestamp - Game.lastFrame) / 16.666;
+
+    Game.lastFrame = timestamp;
+
+    Game.raceTime += delta / 60;
+
+    raceClock.textContent =
+        Game.raceTime.toFixed(2);
+
+    updateRacers(delta);
+
+    updateTrackSprites();
+
+    updateLeaderboard();
+
+    if (!Game.raceFinished) {
+
+        requestAnimationFrame(raceLoop);
+
+    }
+
+}
