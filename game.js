@@ -638,7 +638,7 @@ function updateRacers(delta) {
 
         if (rat.finished) return;
 
-        // Small random pace changes
+        // Occasionally adjust target speed
         if (Math.random() < 0.012) {
 
             rat.targetSpeed =
@@ -655,21 +655,24 @@ function updateRacers(delta) {
             (rat.targetSpeed - rat.speed) *
             rat.acceleration;
 
-        // Stamina effect
+        // Stamina
         const staminaFactor =
             1 -
-            ((rat.distance / TRACK_LENGTH) * (1 - rat.stamina));
+            ((rat.distance / TRACK_LENGTH) *
+            (1 - rat.stamina));
 
         rat.distance +=
             rat.speed *
             staminaFactor *
             delta;
 
-        // Finish
+        // Finish line
         if (rat.distance >= TRACK_LENGTH) {
 
             rat.distance = TRACK_LENGTH;
+
             rat.finished = true;
+
             rat.finishTime = Game.raceTime;
 
             Game.results.push(rat);
@@ -678,7 +681,7 @@ function updateRacers(delta) {
 
     });
 
-    // End race when every rat has finished
+    // Finish race when everyone has crossed
     if (Game.racers.every(rat => rat.finished)) {
 
         finishRace();
