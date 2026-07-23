@@ -567,46 +567,50 @@ function randomBetween(min, max) {
 function initializeRaceEngine() {
 
     Game.results = [];
+
     Game.raceStarted = false;
+
     Game.raceFinished = false;
+
     Game.raceTime = 0;
 
     Game.countdownStart = null;
+
     Game.lastFrame = 0;
+
     Game.phase = "start";
 
     Game.racers.forEach(rat => {
 
         rat.distance = 0;
+
         rat.speed = 0;
 
         rat.finished = false;
+
         rat.finishTime = null;
 
         rat.started = false;
 
         rat.reactionDelay = randomBetween(0.05,0.80);
 
-        rat.acceleration =
-            randomBetween(11,17);
+        rat.acceleration = randomBetween(11,17);
 
-        rat.baseSpeed =
-            randomBetween(27,31);
+        rat.baseSpeed = randomBetween(27,31);
 
-        rat.maxSpeed =
-            randomBetween(35,40);
+        rat.maxSpeed = randomBetween(35,40);
 
-        rat.energy =
-            randomBetween(94,106);
+        rat.energy = randomBetween(94,106);
 
-        rat.consistency =
-            randomBetween(0.97,1.03);
+        rat.consistency = randomBetween(.97,1.03);
 
-        rat.sprint =
-            randomBetween(1.04,1.12);
+        rat.sprint = randomBetween(1.04,1.12);
 
-        rat.eventTimer =
-            randomBetween(2,5);
+        rat.state = "steady";
+
+        rat.stateTimer = randomBetween(1.5,4);
+
+        rat.boost = 1;
 
     });
 
