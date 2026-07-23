@@ -1,3 +1,6 @@
+alert("game.js loaded");
+console.log("game.js loaded");
+
 "use strict";
 // ======================================================
 // RAT RACING 2.0
