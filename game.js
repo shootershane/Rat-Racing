@@ -193,18 +193,19 @@ function buildRatGrid() {
 
     RAT_DATABASE.forEach(rat => {
 
-        const card =
-            document.createElement("div");
+        const card = document.createElement("div");
 
-        card.className =
-            "ratCard";
+        card.className = "ratCard";
 
-        card.dataset.id =
-            rat.id;
+        card.dataset.id = rat.id;
 
         card.innerHTML = `
 
-            <div class="ratEmoji">🐀</div>
+            <div class="ratEmoji">
+
+                ${rat.emoji}
+
+            </div>
 
             <h3>${rat.name}</h3>
 
@@ -213,8 +214,11 @@ function buildRatGrid() {
         `;
 
         card.addEventListener(
+
             "click",
+
             () => toggleRatSelection(rat.id, card)
+
         );
 
         ratGrid.appendChild(card);
@@ -222,7 +226,6 @@ function buildRatGrid() {
     });
 
 }
-
 // ======================================================
 // RAT SELECTION
 // ======================================================
