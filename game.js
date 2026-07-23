@@ -1,7 +1,5 @@
-alert("game.js loaded");
-console.log("game.js loaded");
-
 "use strict";
+
 // ======================================================
 // RAT RACING 2.0
 // Milestone 2
@@ -122,6 +120,8 @@ function initializeProject() {
 
 function buildRatGrid() {
 
+    if (!ratGrid) return;
+
     ratGrid.innerHTML = "";
 
     RAT_DATABASE.forEach(rat => {
@@ -158,19 +158,15 @@ function toggleRatSelection(id, card) {
     if (index !== -1) {
 
         Game.selectedRats.splice(index, 1);
-
         card.classList.remove("selected");
 
     } else {
 
         if (Game.selectedRats.length >= 12) {
-
             return;
-
         }
 
         Game.selectedRats.push(id);
-
         card.classList.add("selected");
 
     }
@@ -185,10 +181,14 @@ function toggleRatSelection(id, card) {
 
 function updateDraftUI() {
 
-    selectedCount.textContent =
-        `${Game.selectedRats.length} / 12 Selected`;
+    if (selectedCount) {
+        selectedCount.textContent =
+            `${Game.selectedRats.length} / 12 Selected`;
+    }
 
-    startRaceButton.disabled =
-        Game.selectedRats.length !== 12;
+    if (startRaceButton) {
+        startRaceButton.disabled =
+            Game.selectedRats.length !== 12;
+    }
 
 }
