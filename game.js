@@ -742,11 +742,16 @@ function updateRacePhase() {
 
 function updateRacers(delta) {
 
+    // Current running order
+    const order = [...Game.racers]
+        .sort((a, b) => b.distance - a.distance);
+
     Game.racers.forEach(rat => {
 
         if (rat.finished)
             return;
 
+        // Reaction delay
         if (!rat.started) {
 
             if (Game.raceTime < rat.reactionDelay)
@@ -756,45 +761,126 @@ function updateRacers(delta) {
 
         }
 
-        rat.speed +=
-            rat.acceleration * delta;
+        // Current position
+        const position =
+            order.findIndex(r => r.id === rat.id) + 1;
 
-        if (rat.speed > rat.baseSpeed) {
+        // Change behavior every few seconds
+        rat.stateTimer -= delta;
 
-            rat.speed = rat.baseSpeed;
+        if (rat.stateTimer <= 0) {
 
-        }
+            rat.stateTimer =
+                randomBetween(1.5, 3.5);
 
-        rat.eventTimer -= delta;
+            let roll = Math.random();
 
-        if (rat.eventTimer <= 0) {
+            if (position <= 3) {
 
-            rat.eventTimer =
-                randomBetween(2.5,6);
+                // Leaders sometimes cool off
+                if (roll < .40)
+                    rat.state = "recover";
+                else if (roll < .80)
+                    rat.state = "steady";
+                else
+                    rat.state = "push";
 
-            if (Math.random() < .25) {
+            }
+            else if (position >= 9) {
 
-                rat.speed *=
-                    randomBetween(.80,.92);
+                // Back markers gamble
+                if (roll < .55)
+                    rat.state = "push";
+                else if (roll < .80)
+                    rat.state = "steady";
+                else
+                    rat.state = "recover";
 
             }
             else {
 
-                rat.speed +=
-                    randomBetween(1,3);
+                // Mid-pack races hardest
+                if (roll < .30)
+                    rat.state = "recover";
+                else if (roll < .65)
+                    rat.state = "steady";
+                else
+                    rat.state = "push";
 
             }
 
         }
 
-        if (Game.phase === "finish") {
+        // Smooth boost changes
+        let targetBoost = 1;
 
-            rat.speed *= rat.sprint;
+        switch (rat.state) {
+
+            case "recover":
+                targetBoost = 0.93;
+                break;
+
+            case "steady":
+                targetBoost = 1.00;
+                break;
+
+            case "push":
+                targetBoost = 1.10;
+                break;
 
         }
 
-        rat.speed *= rat.consistency;
+        // Final stretch
+        if (Game.phase === "finish") {
 
+            targetBoost *= rat.sprint;
+
+            // Back half attacks harder
+            if (position > 6)
+                targetBoost *= 1.03;
+
+        }
+
+        // Smooth transition
+        rat.boost +=
+            (targetBoost - rat.boost) *
+            2.5 * delta;
+
+        // Accelerate toward target speed
+        const targetSpeed =
+            rat.baseSpeed *
+            rat.boost *
+            rat.consistency;
+
+        if (rat.speed < targetSpeed) {
+
+            rat.speed +=
+                rat.acceleration * delta;
+
+            if (rat.speed > targetSpeed)
+                rat.speed = targetSpeed;
+
+        } else {
+
+            rat.speed -=
+                rat.acceleration * .9 * delta;
+
+            if (rat.speed < targetSpeed)
+                rat.speed = targetSpeed;
+
+        }
+
+        // Small random wobble
+        rat.speed *= randomBetween(.995, 1.005);
+
+        // Never exceed max speed
+        if (rat.speed > rat.maxSpeed)
+            rat.speed = rat.maxSpeed;
+
+        if (rat.speed < 0)
+            rat.speed = 0;
+
+        // Move
         rat.distance +=
             rat.speed * delta;
 
@@ -804,8 +890,7 @@ function updateRacers(delta) {
 
             rat.finished = true;
 
-            rat.finishTime =
-                Game.raceTime;
+            rat.finishTime = Game.raceTime;
 
             Game.results.push(rat);
 
