@@ -359,46 +359,57 @@ function assignRandomLanes() {
 // ======================================================
 // BUILD TRACK
 // ======================================================
+function startRace() {
 
-function buildTrack() {
+    Game.racers = [];
+    Game.results = [];
 
-    trackContainer.innerHTML = "";
+    Game.raceStarted = false;
+    Game.raceFinished = false;
+    Game.raceTime = 0;
 
-    const racers = [...Game.racers];
+    Game.selectedRats.forEach(id => {
 
-    racers.sort((a, b) => a.lane - b.lane);
+        const rat =
+            RAT_DATABASE.find(r => r.id === id);
 
-    racers.forEach(rat => {
+        Game.racers.push({
 
-        const lane = document.createElement("div");
+            id: rat.id,
 
-        lane.className = "trackLane";
+            name: rat.name,
 
-        lane.innerHTML = `
+            emoji: rat.emoji,
 
-<div class="laneLabel">
+            lane: 0,
 
-${rat.lane}
+            distance: 0,
 
-</div>
+            speed: 0,
 
-<div class="laneTrack">
+            acceleration: 0,
 
-<div class="ratSprite"
+            finished: false,
 
-data-rat="${rat.id}">
+            finishTime: null
 
-🐀
-
-</div>
-
-</div>
-
-`;
-
-        trackContainer.appendChild(lane);
+        });
 
     });
+
+    assignRandomLanes();
+
+    buildTrack();
+
+    buildLeaderboard();
+
+    draftScreen.classList.add("hidden");
+
+    raceScreen.classList.remove("hidden");
+
+    prepareRace();
+
+    initializeRaceEngine();
 
 }
 
