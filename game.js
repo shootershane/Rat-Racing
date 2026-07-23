@@ -561,15 +561,15 @@ function initializeRaceEngine() {
 
     Game.racers.forEach(rat => {
 
-        rat.acceleration = randomBetween(0.05, 0.10);
+        rat.acceleration = randomBetween(0.015, 0.03);
 
-        rat.topSpeed = randomBetween(4.5, 6.3);
+        rat.topSpeed = randomBetween(1.6, 2.3);
 
-        rat.consistency = randomBetween(0.90, 1.10);
+        rat.consistency = randomBetween(0.94, 1.06);
 
-        rat.burst = randomBetween(0.95, 1.20);
+        rat.burst = randomBetween(1.00, 1.12);
 
-        rat.stamina = randomBetween(0.85, 1.00);
+        rat.stamina = randomBetween(0.90, 1.00);
 
         rat.targetSpeed = rat.topSpeed;
 
