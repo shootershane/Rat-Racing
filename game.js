@@ -291,26 +291,27 @@ function startRace() {
 
     Game.selectedRats.forEach(id => {
 
-        const rat = RAT_DATABASE.find(r => r.id === id);
+        const rat =
+            RAT_DATABASE.find(r => r.id === id);
 
         Game.racers.push({
 
             id: rat.id,
+
             name: rat.name,
+
+            emoji: rat.emoji,
 
             lane: 0,
 
             distance: 0,
+
             speed: 0,
-            targetSpeed: 0,
 
             acceleration: 0,
-            topSpeed: 0,
-            consistency: 0,
-            burst: 0,
-            stamina: 0,
 
             finished: false,
+
             finishTime: null
 
         });
