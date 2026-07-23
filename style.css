@@ -1,8 +1,10 @@
 /* ==========================================================
    RAT RACING 2.0
    style.css
-   Milestone 1
+   Milestone 2
 ========================================================== */
+
+/* ================= ROOT ================= */
 
 :root{
 
@@ -26,9 +28,7 @@
 
 }
 
-/* ==========================================================
-   RESET
-========================================================== */
+/* ================= RESET ================= */
 
 *{
     margin:0;
@@ -42,10 +42,7 @@ body{
 
     color:var(--text);
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-family:Arial, Helvetica, sans-serif;
 
 }
 
@@ -57,13 +54,11 @@ button{
 
 .hidden{
 
-    display:none;
+    display:none !important;
 
 }
 
-/* ==========================================================
-   APP
-========================================================== */
+/* ================= APP ================= */
 
 #app{
 
@@ -75,9 +70,7 @@ button{
 
 }
 
-/* ==========================================================
-   HEADER
-========================================================== */
+/* ================= HEADER ================= */
 
 #header{
 
@@ -103,9 +96,7 @@ button{
 
 }
 
-/* ==========================================================
-   PANELS
-========================================================== */
+/* ================= PANELS ================= */
 
 .panel{
 
@@ -121,9 +112,7 @@ button{
 
 }
 
-/* ==========================================================
-   HOME SCREEN
-========================================================== */
+/* ================= HOME ================= */
 
 #homeScreen{
 
@@ -143,17 +132,15 @@ button{
 
 #statusText{
 
-    font-size:1.2rem;
-
     margin:25px 0;
+
+    font-size:1.2rem;
 
     color:var(--accent);
 
 }
 
-/* ==========================================================
-   BUTTONS
-========================================================== */
+/* ================= BUTTONS ================= */
 
 button{
 
@@ -167,11 +154,11 @@ button{
 
     padding:14px 22px;
 
-    cursor:pointer;
-
     font-weight:bold;
 
-    transition:.20s;
+    cursor:pointer;
+
+    transition:.2s;
 
 }
 
@@ -183,7 +170,7 @@ button:hover{
 
 button:active{
 
-    transform:translateY(0);
+    transform:none;
 
 }
 
@@ -195,9 +182,7 @@ button:disabled{
 
 }
 
-/* ==========================================================
-   DRAFT SCREEN
-========================================================== */
+/* ================= DRAFT ================= */
 
 #draftScreen{
 
@@ -219,40 +204,31 @@ button:disabled{
 
     display:grid;
 
-    grid-template-columns:
-        repeat(auto-fill,minmax(180px,1fr));
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
 
-    gap:15px;
+    gap:18px;
 
 }
-.ratCard {
-    cursor: pointer;
-    transition: 0.2s;
-}
 
-.ratCard:hover {
-    transform: translateY(-3px);
-}
+/* ================= RAT CARD ================= */
 
-.ratCard.selected {
-    border: 3px solid #4CAF50;
-    background: #dff6df;
-    transform: scale(1.03);
-}.ratCard{
+.ratCard{
 
     background:var(--panelLight);
 
     border:2px solid transparent;
 
-    border-radius:10px;
+    border-radius:12px;
 
-    padding:15px;
+    padding:18px;
+
+    text-align:center;
 
     cursor:pointer;
 
-    transition:.20s;
+    transition:.2s;
 
-    text-align:center;
+    user-select:none;
 
 }
 
@@ -260,15 +236,43 @@ button:disabled{
 
     border-color:var(--accent);
 
-    transform:translateY(-3px);
+    transform:translateY(-4px);
 
 }
 
 .ratCard.selected{
 
-    border-color:var(--green);
+    background:#2b4d36;
+
+    border:3px solid var(--green);
+
+    transform:scale(1.03);
 
 }
+
+.ratEmoji{
+
+    font-size:46px;
+
+    margin-bottom:12px;
+
+}
+
+.ratCard h3{
+
+    margin-bottom:8px;
+
+}
+
+.ratCard p{
+
+    color:var(--muted);
+
+    font-size:.9rem;
+
+}
+
+/* ================= DRAFT FOOTER ================= */
 
 #draftFooter{
 
@@ -278,260 +282,309 @@ button:disabled{
 
     align-items:center;
 
+    padding-top:10px;
+
 }
 
+#selectedCount{
+
+    font-size:1.1rem;
+
+    font-weight:bold;
+
+}
 /* ==========================================================
-   RACE SCREEN
+   RAT RACING 2.0
+   style.css
+   Milestone 2
 ========================================================== */
 
-#raceScreen{
+/* ================= ROOT ================= */
 
-    display:grid;
+:root{
 
-    grid-template-columns:3fr 350px;
+    --bg:#111111;
+    --panel:#1d1d1d;
+    --panelLight:#292929;
 
-    gap:20px;
+    --accent:#ffc107;
 
-}
+    --text:#f5f5f5;
+    --muted:#aaaaaa;
 
-/* ==========================================================
-   HUD
-========================================================== */
+    --green:#3bd16f;
+    --red:#d34d4d;
 
-#hud{
+    --border:#444444;
 
-    grid-column:1 / span 2;
+    --radius:12px;
 
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
-
-    gap:15px;
+    --shadow:0 10px 25px rgba(0,0,0,.35);
 
 }
 
-.hudCard{
+/* ================= RESET ================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    background:var(--bg);
+
+    color:var(--text);
+
+    font-family:Arial, Helvetica, sans-serif;
+
+}
+
+button{
+
+    font:inherit;
+
+}
+
+.hidden{
+
+    display:none !important;
+
+}
+
+/* ================= APP ================= */
+
+#app{
+
+    width:min(1500px,95%);
+
+    margin:auto;
+
+    padding:30px;
+
+}
+
+/* ================= HEADER ================= */
+
+#header{
+
+    text-align:center;
+
+    margin-bottom:35px;
+
+}
+
+#header h1{
+
+    font-size:3rem;
+
+    margin-bottom:10px;
+
+}
+
+.subtitle{
+
+    color:var(--muted);
+
+    font-size:1.1rem;
+
+}
+
+/* ================= PANELS ================= */
+
+.panel{
 
     background:var(--panel);
 
     border:1px solid var(--border);
 
-    border-radius:10px;
+    border-radius:var(--radius);
 
-    text-align:center;
+    padding:20px;
 
-    padding:18px;
-
-}
-
-.hudCard label{
-
-    display:block;
-
-    color:var(--muted);
-
-    margin-bottom:8px;
+    box-shadow:var(--shadow);
 
 }
 
-.hudCard span{
+/* ================= HOME ================= */
 
-    font-size:1.5rem;
-
-    font-weight:bold;
-
-}
-
-/* ==========================================================
-   TRACK
-========================================================== */
-
-#trackContainer{
-
-    background:#4d9d42;
-
-    border-radius:12px;
-
-    overflow:hidden;
-
-    border:4px solid #ddd;
-
-    min-height:720px;
-
-}
-
-.lane{
-
-    position:relative;
-
-    height:60px;
-
-    border-bottom:
-        1px dashed rgba(255,255,255,.35);
-
-}
-
-.rat{
-
-    position:absolute;
-
-    left:0;
-
-    top:10px;
-
-    font-size:34px;
-
-}
-
-.finishLine{
-
-    position:absolute;
-
-    right:0;
-
-    top:0;
-
-    width:8px;
-
-    height:100%;
-
-    background:white;
-
-}
-
-/* ==========================================================
-   SIDEBAR
-========================================================== */
-
-#sidebar{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:20px;
-
-}
-
-#leaderboard{
-
-    margin-left:20px;
-
-    line-height:1.9;
-
-}
-
-#commentaryLog{
-
-    height:340px;
-
-    overflow-y:auto;
-
-    padding:10px;
-
-    background:#171717;
-
-    border-radius:8px;
-
-}
-
-/* ==========================================================
-   RESULTS
-========================================================== */
-
-#resultsScreen{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:20px;
-
-}
-
-#resultsScreen h2{
-
-    text-align:center;
-
-}
-
-#winnerBanner{
-
-    text-align:center;
-
-    font-size:2rem;
-
-    color:gold;
-
-}
-
-#resultsTable{
-
-    width:100%;
-
-    border-collapse:collapse;
-
-}
-
-#resultsTable th{
-
-    background:#333;
-
-}
-
-#resultsTable th,
-#resultsTable td{
-
-    border:1px solid var(--border);
-
-    padding:12px;
-
-    text-align:center;
-
-}
-
-#resultsTable tbody tr:nth-child(even){
-
-    background:#252525;
-
-}
-
-.resultsButtons{
+#homeScreen{
 
     display:flex;
 
     justify-content:center;
 
+}
+
+#homeScreen .panel{
+
+    width:500px;
+
+    text-align:center;
+
+}
+
+#statusText{
+
+    margin:25px 0;
+
+    font-size:1.2rem;
+
+    color:var(--accent);
+
+}
+
+/* ================= BUTTONS ================= */
+
+button{
+
+    background:var(--accent);
+
+    color:#111;
+
+    border:none;
+
+    border-radius:8px;
+
+    padding:14px 22px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+button:hover{
+
+    transform:translateY(-2px);
+
+}
+
+button:active{
+
+    transform:none;
+
+}
+
+button:disabled{
+
+    opacity:.45;
+
+    cursor:not-allowed;
+
+}
+
+/* ================= DRAFT ================= */
+
+#draftScreen{
+
+    display:flex;
+
+    flex-direction:column;
+
     gap:20px;
 
 }
 
-/* ==========================================================
-   RESPONSIVE
-========================================================== */
+#draftScreen h2{
 
-@media (max-width:1000px){
+    text-align:center;
 
-    #raceScreen{
+}
 
-        grid-template-columns:1fr;
+#ratGrid{
 
-    }
+    display:grid;
 
-    #hud{
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
 
-        grid-column:auto;
+    gap:18px;
 
-        grid-template-columns:1fr;
+}
 
-    }
+/* ================= RAT CARD ================= */
 
-    #draftFooter{
+.ratCard{
 
-        flex-direction:column;
+    background:var(--panelLight);
 
-        gap:15px;
+    border:2px solid transparent;
 
-    }
+    border-radius:12px;
+
+    padding:18px;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    user-select:none;
+
+}
+
+.ratCard:hover{
+
+    border-color:var(--accent);
+
+    transform:translateY(-4px);
+
+}
+
+.ratCard.selected{
+
+    background:#2b4d36;
+
+    border:3px solid var(--green);
+
+    transform:scale(1.03);
+
+}
+
+.ratEmoji{
+
+    font-size:46px;
+
+    margin-bottom:12px;
+
+}
+
+.ratCard h3{
+
+    margin-bottom:8px;
+
+}
+
+.ratCard p{
+
+    color:var(--muted);
+
+    font-size:.9rem;
+
+}
+
+/* ================= DRAFT FOOTER ================= */
+
+#draftFooter{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding-top:10px;
+
+}
+
+#selectedCount{
+
+    font-size:1.1rem;
+
+    font-weight:bold;
 
 }
