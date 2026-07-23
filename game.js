@@ -610,6 +610,8 @@ function initializeRaceEngine() {
 
         rat.stateTimer = randomBetween(1.5,4);
 
+        rat.eventTimer = randomBetween(2,4);
+
         rat.boost = 1;
 
     });
