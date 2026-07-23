@@ -2,20 +2,39 @@
 
 // ======================================================
 // RAT RACING 2.0
-// Milestone 2
-// Foundation + Draft Selection
+// Milestone 3
+// Foundation + Draft + Race Setup
 // ======================================================
+
+// ======================================================
+// GAME SETTINGS
+// ======================================================
+
+const TOTAL_RACERS = 12;
+const TRACK_LENGTH = 1000;
 
 // ======================================================
 // APP STATE
 // ======================================================
 
 const Game = {
+
     version: "2.0",
+
     initialized: false,
+
     selectedRats: [],
+
     racers: [],
+
+    raceStarted: false,
+
+    raceFinished: false,
+
+    raceTime: 0,
+
     results: []
+
 };
 
 // ======================================================
@@ -23,6 +42,7 @@ const Game = {
 // ======================================================
 
 const RAT_DATABASE = [
+
     { id: 1, name: "Cheddar" },
     { id: 2, name: "Rocket" },
     { id: 3, name: "Pizza Pete" },
@@ -47,42 +67,92 @@ const RAT_DATABASE = [
     { id: 22, name: "Dusty" },
     { id: 23, name: "Magnet" },
     { id: 24, name: "Lucky" }
+
 ];
 
 // ======================================================
-// DOM ELEMENTS
+// DOM REFERENCES
 // ======================================================
 
-const statusText = document.getElementById("statusText");
-const initializeButton = document.getElementById("initializeButton");
+const statusText =
+    document.getElementById("statusText");
 
-const homeScreen = document.getElementById("homeScreen");
-const draftScreen = document.getElementById("draftScreen");
+const initializeButton =
+    document.getElementById("initializeButton");
 
-const ratGrid = document.getElementById("ratGrid");
+const homeScreen =
+    document.getElementById("homeScreen");
 
-const selectedCount = document.getElementById("selectedCount");
-const startRaceButton = document.getElementById("startRaceButton");
+const draftScreen =
+    document.getElementById("draftScreen");
+
+const raceScreen =
+    document.getElementById("raceScreen");
+
+const ratGrid =
+    document.getElementById("ratGrid");
+
+const selectedCount =
+    document.getElementById("selectedCount");
+
+const startRaceButton =
+    document.getElementById("startRaceButton");
+
+const trackContainer =
+    document.getElementById("trackContainer");
+
+const leaderboard =
+    document.getElementById("leaderboard");
+
+const raceClock =
+    document.getElementById("raceClock");
+
+const distanceRemaining =
+    document.getElementById("distanceRemaining");
+
+const leaderName =
+    document.getElementById("leaderName");
 
 // ======================================================
 // STARTUP
 // ======================================================
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener(
+    "DOMContentLoaded",
+    init
+);
 
 function init() {
 
     console.log("Rat Racing 2.0 Loaded");
 
     if (statusText) {
-        statusText.textContent = "JavaScript Ready";
+
+        statusText.textContent =
+            "JavaScript Ready";
+
     }
 
     if (initializeButton) {
-        initializeButton.addEventListener("click", initializeProject);
+
+        initializeButton.addEventListener(
+            "click",
+            initializeProject
+        );
+
+    }
+
+    if (startRaceButton) {
+
+        startRaceButton.addEventListener(
+            "click",
+            startRace
+        );
+
     }
 
     buildRatGrid();
+
     updateDraftUI();
 
 }
@@ -93,21 +163,20 @@ function init() {
 
 function initializeProject() {
 
-    if (Game.initialized) return;
+    if (Game.initialized)
+        return;
 
     Game.initialized = true;
 
-    console.log("Project Initialized");
-
-    if (statusText) {
-        statusText.textContent = "Project Initialized!";
-    }
-
     initializeButton.disabled = true;
+
+    statusText.textContent =
+        "Project Initialized!";
 
     setTimeout(() => {
 
         homeScreen.classList.add("hidden");
+
         draftScreen.classList.remove("hidden");
 
     }, 500);
@@ -120,26 +189,33 @@ function initializeProject() {
 
 function buildRatGrid() {
 
-    if (!ratGrid) return;
-
     ratGrid.innerHTML = "";
 
     RAT_DATABASE.forEach(rat => {
 
-        const card = document.createElement("div");
+        const card =
+            document.createElement("div");
 
-        card.className = "ratCard";
-        card.dataset.id = rat.id;
+        card.className =
+            "ratCard";
+
+        card.dataset.id =
+            rat.id;
 
         card.innerHTML = `
+
             <div class="ratEmoji">🐀</div>
+
             <h3>${rat.name}</h3>
+
             <p>Rat #${rat.id}</p>
+
         `;
 
-        card.addEventListener("click", () => {
-            toggleRatSelection(rat.id, card);
-        });
+        card.addEventListener(
+            "click",
+            () => toggleRatSelection(rat.id, card)
+        );
 
         ratGrid.appendChild(card);
 
@@ -153,21 +229,30 @@ function buildRatGrid() {
 
 function toggleRatSelection(id, card) {
 
-    const index = Game.selectedRats.indexOf(id);
+    const index =
+        Game.selectedRats.indexOf(id);
 
     if (index !== -1) {
 
         Game.selectedRats.splice(index, 1);
-        card.classList.remove("selected");
+
+        card.classList.remove(
+            "selected"
+        );
 
     } else {
 
-        if (Game.selectedRats.length >= 12) {
+        if (
+            Game.selectedRats.length >= TOTAL_RACERS
+        ) {
             return;
         }
 
         Game.selectedRats.push(id);
-        card.classList.add("selected");
+
+        card.classList.add(
+            "selected"
+        );
 
     }
 
@@ -176,19 +261,298 @@ function toggleRatSelection(id, card) {
 }
 
 // ======================================================
-// UPDATE UI
+// UPDATE DRAFT UI
 // ======================================================
 
 function updateDraftUI() {
 
-    if (selectedCount) {
-        selectedCount.textContent =
-            `${Game.selectedRats.length} / 12 Selected`;
+    selectedCount.textContent =
+
+        `${Game.selectedRats.length} / ${TOTAL_RACERS} Selected`;
+
+    startRaceButton.disabled =
+
+        Game.selectedRats.length !== TOTAL_RACERS;
+
+}
+// ======================================================
+// START RACE
+// ======================================================
+
+function startRace() {
+
+    Game.racers = [];
+
+    Game.results = [];
+
+    Game.raceStarted = false;
+
+    Game.raceFinished = false;
+
+    Game.raceTime = 0;
+
+    Game.selectedRats.forEach(id => {
+
+        const rat = RAT_DATABASE.find(r => r.id === id);
+
+        Game.racers.push({
+
+            id: rat.id,
+
+            name: rat.name,
+
+            lane: 0,
+
+            distance: 0,
+
+            speed: 0,
+
+            finished: false,
+
+            finishTime: null
+
+        });
+
+    });
+
+    assignRandomLanes();
+
+    buildTrack();
+
+    buildLeaderboard();
+
+    draftScreen.classList.add("hidden");
+
+    raceScreen.classList.remove("hidden");
+
+    raceClock.textContent = "0.00";
+
+    distanceRemaining.textContent = TRACK_LENGTH;
+
+    leaderName.textContent = "--";
+
+    console.table(Game.racers);
+
+}
+
+// ======================================================
+// ASSIGN RANDOM LANES
+// ======================================================
+
+function assignRandomLanes() {
+
+    const lanes = [];
+
+    for (let i = 1; i <= TOTAL_RACERS; i++) {
+
+        lanes.push(i);
+
     }
 
-    if (startRaceButton) {
-        startRaceButton.disabled =
-            Game.selectedRats.length !== 12;
+    shuffleArray(lanes);
+
+    Game.racers.forEach((rat, index) => {
+
+        rat.lane = lanes[index];
+
+    });
+
+}
+
+// ======================================================
+// BUILD TRACK
+// ======================================================
+
+function buildTrack() {
+
+    trackContainer.innerHTML = "";
+
+    const racers = [...Game.racers];
+
+    racers.sort((a, b) => a.lane - b.lane);
+
+    racers.forEach(rat => {
+
+        const lane = document.createElement("div");
+
+        lane.className = "trackLane";
+
+        lane.innerHTML = `
+
+<div class="laneLabel">
+
+${rat.lane}
+
+</div>
+
+<div class="laneTrack">
+
+<div class="ratSprite"
+
+data-rat="${rat.id}">
+
+🐀
+
+</div>
+
+</div>
+
+`;
+
+        trackContainer.appendChild(lane);
+
+    });
+
+}
+
+// ======================================================
+// BUILD LEADERBOARD
+// ======================================================
+
+function buildLeaderboard() {
+
+    leaderboard.innerHTML = "";
+
+    const racers = [...Game.racers];
+
+    racers.sort((a, b) => a.lane - b.lane);
+
+    racers.forEach(rat => {
+
+        const row = document.createElement("div");
+
+        row.className = "leaderboardRow";
+
+        row.id = `leader-${rat.id}`;
+
+        row.innerHTML = `
+
+<span>
+
+${rat.name}
+
+</span>
+
+<span>
+
+0'
+
+</span>
+
+`;
+
+        leaderboard.appendChild(row);
+
+    });
+
+}
+
+// ======================================================
+// SHUFFLE ARRAY
+// ======================================================
+
+function shuffleArray(array) {
+
+    for (let i = array.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+
     }
 
 }
+// ======================================================
+// RESET RACE
+// ======================================================
+
+function resetRaceState() {
+
+    Game.raceStarted = false;
+
+    Game.raceFinished = false;
+
+    Game.raceTime = 0;
+
+    Game.results = [];
+
+    Game.racers.forEach(rat => {
+
+        rat.distance = 0;
+        rat.speed = 0;
+        rat.finished = false;
+        rat.finishTime = null;
+
+    });
+
+}
+
+// ======================================================
+// UPDATE LEADERBOARD
+// ======================================================
+
+function updateLeaderboard() {
+
+    const racers = [...Game.racers];
+
+    racers.sort((a, b) => b.distance - a.distance);
+
+    racers.forEach(rat => {
+
+        const row = document.getElementById(`leader-${rat.id}`);
+
+        if (!row) return;
+
+        const spans = row.querySelectorAll("span");
+
+        spans[0].textContent = rat.name;
+
+        spans[1].textContent =
+            `${Math.floor(rat.distance)}'`;
+
+    });
+
+    if (racers.length > 0) {
+
+        leaderName.textContent = racers[0].name;
+
+        distanceRemaining.textContent =
+            Math.max(
+                0,
+                Math.ceil(TRACK_LENGTH - racers[0].distance)
+            );
+
+    }
+
+}
+
+// ======================================================
+// PREPARE RACE
+// ======================================================
+
+function prepareRace() {
+
+    resetRaceState();
+
+    updateLeaderboard();
+
+    raceClock.textContent = "0.00";
+
+}
+
+// ======================================================
+// PLACEHOLDER
+// (Milestone 4 will replace this)
+// ======================================================
+
+function beginRace() {
+
+    console.log("Race engine coming in Milestone 4.");
+
+}
+
+// ======================================================
+// READY
+// ======================================================
+
+console.log("Milestone 3 Loaded");
