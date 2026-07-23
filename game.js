@@ -628,3 +628,116 @@ function raceLoop(timestamp) {
     }
 
 }
+// ======================================================
+// UPDATE RACERS
+// ======================================================
+
+function updateRacers(delta) {
+
+    let finishedCount = 0;
+
+    Game.racers.forEach(rat => {
+
+        if (rat.finished) {
+            finishedCount++;
+            return;
+        }
+
+        // Small random pace changes
+        if (Math.random() < 0.025) {
+
+            const modifier =
+                randomBetween(rat.consistency, rat.burst);
+
+            rat.targetSpeed =
+                rat.topSpeed * modifier;
+
+        }
+
+        // Smooth acceleration toward target speed
+        rat.speed +=
+            (rat.targetSpeed - rat.speed) *
+            rat.acceleration;
+
+        // Stamina slowly affects pace late in race
+        const staminaFactor =
+            1 -
+            ((rat.distance / TRACK_LENGTH) * (1 - rat.stamina));
+
+        rat.distance +=
+            rat.speed *
+            staminaFactor *
+            delta;
+
+        // Finish line
+        if (rat.distance >= TRACK_LENGTH) {
+
+            rat.distance = TRACK_LENGTH;
+
+            rat.finished = true;
+
+            rat.finishTime = Game.raceTime;
+
+            Game.results.push(rat);
+
+            finishedCount++;
+
+        }
+
+    });
+
+    if (finishedCount === TOTAL_RACERS) {
+
+        finishRace();
+
+    }
+
+}
+// ======================================================
+// UPDATE TRACK SPRITES
+// ======================================================
+
+function updateTrackSprites() {
+
+    const width =
+        trackContainer.clientWidth - 80;
+
+    Game.racers.forEach(rat => {
+
+        const sprite =
+            document.querySelector(
+                `[data-rat="${rat.id}"]`
+            );
+
+        if (!sprite)
+            return;
+
+        const percent =
+            rat.distance / TRACK_LENGTH;
+
+        sprite.style.left =
+            `${percent * width}px`;
+
+    });
+
+}// ======================================================
+// FINISH RACE
+// ======================================================
+
+function finishRace() {
+
+    if (Game.raceFinished)
+        return;
+
+    Game.raceFinished = true;
+
+    Game.raceStarted = false;
+
+    console.table(Game.results);
+
+    console.log(
+        "Winner:",
+        Game.results[0].name
+    );
+
+}
