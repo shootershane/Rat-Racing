@@ -561,32 +561,78 @@ function initializeRaceEngine() {
 
     Game.racers.forEach(rat => {
 
-        rat.acceleration = randomBetween(0.015, 0.03);
+        // Hidden stats generated fresh every race
+        rat.reactionTime = randomBetween(0.0, 0.8);      // seconds
+        rat.acceleration = randomBetween(0.004, 0.010);
+        rat.topSpeed = randomBetween(0.90, 1.20);
 
-        rat.topSpeed = randomBetween(1.6, 2.3);
-
+        rat.endurance = randomBetween(0.90, 1.05);
         rat.consistency = randomBetween(0.94, 1.06);
-
-        rat.burst = randomBetween(1.00, 1.12);
-
-        rat.stamina = randomBetween(0.90, 1.00);
-
-        rat.targetSpeed = rat.topSpeed;
+        rat.sprint = randomBetween(1.05, 1.20);
 
         rat.speed = 0;
-
+        rat.targetSpeed = 0;
         rat.distance = 0;
+
+        rat.finished = false;
+        rat.finishTime = null;
+
+        rat.state = "waiting";
+        rat.eventTimer = randomBetween(2,5);
 
     });
 
+    Game.countdown = 3;
+    Game.lastCountdown = performance.now();
+
+    raceClock.textContent = "3";
+
     Game.lastFrame = performance.now();
 
-    Game.raceStarted = true;
+    Game.raceStarted = false;
 
-    requestAnimationFrame(raceLoop);
+    requestAnimationFrame(countdownLoop);
 
 }
+// ======================================================
+// COUNTDOWN
+// ======================================================
 
+function countdownLoop(timestamp) {
+
+    if (timestamp - Game.lastCountdown >= 1000) {
+
+        Game.countdown--;
+
+        Game.lastCountdown = timestamp;
+
+        if (Game.countdown > 0) {
+
+            raceClock.textContent = Game.countdown;
+
+        }
+        else if (Game.countdown === 0) {
+
+            raceClock.textContent = "GO!";
+
+        }
+        else {
+
+            Game.raceStarted = true;
+
+            Game.lastFrame = performance.now();
+
+            requestAnimationFrame(raceLoop);
+
+            return;
+
+        }
+
+    }
+
+    requestAnimationFrame(countdownLoop);
+
+}
 // ======================================================
 // RANDOM NUMBER
 // ======================================================
