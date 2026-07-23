@@ -490,38 +490,77 @@ function resetRaceState() {
 
 function updateLeaderboard() {
 
-    const racers = [...Game.racers];
+    // Sort racers by current position
+    const racers = [...Game.racers]
+        .sort((a, b) => {
 
-    racers.sort((a, b) => b.distance - a.distance);
+            if (a.finished && b.finished)
+                return a.finishTime - b.finishTime;
 
-    racers.forEach(rat => {
+            if (a.finished)
+                return -1;
 
-        const row = document.getElementById(`leader-${rat.id}`);
+            if (b.finished)
+                return 1;
 
-        if (!row) return;
+            return b.distance - a.distance;
 
-        const spans = row.querySelectorAll("span");
+        });
 
-        spans[0].textContent = rat.name;
+    leaderboard.innerHTML = "";
 
-        spans[1].textContent =
-            `${Math.floor(rat.distance)}'`;
+    racers.forEach((rat, index) => {
+
+        const row = document.createElement("div");
+
+        row.className = "leaderboardRow";
+
+        let place = `${index + 1}.`;
+
+        if (index === 0) place = "🥇";
+        else if (index === 1) place = "🥈";
+        else if (index === 2) place = "🥉";
+
+        row.innerHTML = `
+
+            <span>${place} ${rat.name}</span>
+
+        `;
+
+        leaderboard.appendChild(row);
 
     });
 
     if (racers.length > 0) {
 
-        leaderName.textContent = racers[0].name;
+        if (Game.raceFinished) {
 
-        distanceRemaining.textContent =
-            Math.max(
-                0,
-                Math.ceil(TRACK_LENGTH - racers[0].distance)
-            );
+            leaderName.textContent =
+                `🏆 ${Game.results[0].name}`;
+
+            distanceRemaining.textContent =
+                "FINISHED";
+
+        } else {
+
+            leaderName.textContent =
+                racers[0].name;
+
+            distanceRemaining.textContent =
+                Math.max(
+                    0,
+                    Math.ceil(
+                        TRACK_LENGTH -
+                        racers[0].distance
+                    )
+                );
+
+        }
 
     }
 
 }
+
 
 // ======================================================
 // PREPARE RACE
