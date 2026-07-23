@@ -294,192 +294,140 @@ button:disabled{
 
 }
 /* ==========================================================
-   RAT RACING 2.0
-   style.css
-   Milestone 2
+   RACE SCREEN
 ========================================================== */
 
-/* ================= ROOT ================= */
+#raceScreen{
 
-:root{
+    display:grid;
 
-    --bg:#111111;
-    --panel:#1d1d1d;
-    --panelLight:#292929;
+    grid-template-columns:3fr 350px;
 
-    --accent:#ffc107;
-
-    --text:#f5f5f5;
-    --muted:#aaaaaa;
-
-    --green:#3bd16f;
-    --red:#d34d4d;
-
-    --border:#444444;
-
-    --radius:12px;
-
-    --shadow:0 10px 25px rgba(0,0,0,.35);
+    gap:20px;
 
 }
 
-/* ================= RESET ================= */
+/* ==========================================================
+   HUD
+========================================================== */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+#hud{
 
-body{
+    grid-column:1 / span 2;
 
-    background:var(--bg);
+    display:grid;
 
-    color:var(--text);
+    grid-template-columns:repeat(3,1fr);
 
-    font-family:Arial, Helvetica, sans-serif;
+    gap:15px;
 
 }
 
-button{
-
-    font:inherit;
-
-}
-
-.hidden{
-
-    display:none !important;
-
-}
-
-/* ================= APP ================= */
-
-#app{
-
-    width:min(1500px,95%);
-
-    margin:auto;
-
-    padding:30px;
-
-}
-
-/* ================= HEADER ================= */
-
-#header{
-
-    text-align:center;
-
-    margin-bottom:35px;
-
-}
-
-#header h1{
-
-    font-size:3rem;
-
-    margin-bottom:10px;
-
-}
-
-.subtitle{
-
-    color:var(--muted);
-
-    font-size:1.1rem;
-
-}
-
-/* ================= PANELS ================= */
-
-.panel{
+.hudCard{
 
     background:var(--panel);
 
     border:1px solid var(--border);
 
-    border-radius:var(--radius);
+    border-radius:12px;
 
-    padding:20px;
-
-    box-shadow:var(--shadow);
-
-}
-
-/* ================= HOME ================= */
-
-#homeScreen{
-
-    display:flex;
-
-    justify-content:center;
-
-}
-
-#homeScreen .panel{
-
-    width:500px;
+    padding:18px;
 
     text-align:center;
 
 }
 
-#statusText{
+.hudCard label{
 
-    margin:25px 0;
+    display:block;
 
-    font-size:1.2rem;
+    color:var(--muted);
 
-    color:var(--accent);
+    margin-bottom:8px;
+
+    font-size:.9rem;
 
 }
 
-/* ================= BUTTONS ================= */
+.hudCard span{
 
-button{
-
-    background:var(--accent);
-
-    color:#111;
-
-    border:none;
-
-    border-radius:8px;
-
-    padding:14px 22px;
+    font-size:1.5rem;
 
     font-weight:bold;
 
-    cursor:pointer;
+}
 
-    transition:.2s;
+/* ==========================================================
+   TRACK
+========================================================== */
+
+#trackContainer{
+
+    position:relative;
+
+    min-height:720px;
+
+    background:#4d9d42;
+
+    border:4px solid #dddddd;
+
+    border-radius:12px;
+
+    overflow:hidden;
 
 }
 
-button:hover{
+.lane{
 
-    transform:translateY(-2px);
+    position:relative;
 
-}
+    height:60px;
 
-button:active{
-
-    transform:none;
+    border-bottom:1px dashed rgba(255,255,255,.35);
 
 }
 
-button:disabled{
+.lane:last-child{
 
-    opacity:.45;
-
-    cursor:not-allowed;
+    border-bottom:none;
 
 }
 
-/* ================= DRAFT ================= */
+.rat{
 
-#draftScreen{
+    position:absolute;
+
+    left:0;
+
+    top:10px;
+
+    font-size:34px;
+
+    transition:left .08s linear;
+
+}
+
+.finishLine{
+
+    position:absolute;
+
+    top:0;
+
+    right:0;
+
+    width:8px;
+
+    height:100%;
+
+    background:white;
+
+}
+
+/* ==========================================================
+   SIDEBAR
+========================================================== */
+
+#sidebar{
 
     display:flex;
 
@@ -489,102 +437,177 @@ button:disabled{
 
 }
 
-#draftScreen h2{
+#leaderboard{
 
-    text-align:center;
+    margin-left:22px;
 
-}
-
-#ratGrid{
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-
-    gap:18px;
+    line-height:1.9;
 
 }
 
-/* ================= RAT CARD ================= */
+#commentaryLog{
 
-.ratCard{
+    height:340px;
 
-    background:var(--panelLight);
+    overflow-y:auto;
 
-    border:2px solid transparent;
+    padding:12px;
 
-    border-radius:12px;
+    background:#171717;
 
-    padding:18px;
+    border-radius:10px;
 
-    text-align:center;
+    border:1px solid var(--border);
 
-    cursor:pointer;
-
-    transition:.2s;
-
-    user-select:none;
+    line-height:1.5;
 
 }
 
-.ratCard:hover{
+/* ==========================================================
+   RESULTS
+========================================================== */
 
-    border-color:var(--accent);
-
-    transform:translateY(-4px);
-
-}
-
-.ratCard.selected{
-
-    background:#2b4d36;
-
-    border:3px solid var(--green);
-
-    transform:scale(1.03);
-
-}
-
-.ratEmoji{
-
-    font-size:46px;
-
-    margin-bottom:12px;
-
-}
-
-.ratCard h3{
-
-    margin-bottom:8px;
-
-}
-
-.ratCard p{
-
-    color:var(--muted);
-
-    font-size:.9rem;
-
-}
-
-/* ================= DRAFT FOOTER ================= */
-
-#draftFooter{
+#resultsScreen{
 
     display:flex;
 
-    justify-content:space-between;
+    flex-direction:column;
 
-    align-items:center;
-
-    padding-top:10px;
+    gap:20px;
 
 }
 
-#selectedCount{
+#resultsScreen h2{
 
-    font-size:1.1rem;
+    text-align:center;
+
+}
+
+#winnerBanner{
+
+    text-align:center;
+
+    font-size:2rem;
 
     font-weight:bold;
+
+    color:gold;
+
+}
+
+#resultsTable{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+#resultsTable th{
+
+    background:#333333;
+
+}
+
+#resultsTable th,
+#resultsTable td{
+
+    border:1px solid var(--border);
+
+    padding:12px;
+
+    text-align:center;
+
+}
+
+#resultsTable tbody tr:nth-child(even){
+
+    background:#252525;
+
+}
+
+.resultsButtons{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:20px;
+
+}
+
+/* ==========================================================
+   UTILITY
+========================================================== */
+
+.screen{
+
+    width:100%;
+
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1000px){
+
+    #raceScreen{
+
+        grid-template-columns:1fr;
+
+    }
+
+    #hud{
+
+        grid-column:auto;
+
+        grid-template-columns:1fr;
+
+    }
+
+    #draftFooter{
+
+        flex-direction:column;
+
+        gap:15px;
+
+        text-align:center;
+
+    }
+
+    #sidebar{
+
+        margin-top:20px;
+
+    }
+
+}
+
+@media (max-width:700px){
+
+    #header h1{
+
+        font-size:2.2rem;
+
+    }
+
+    #ratGrid{
+
+        grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+
+    }
+
+    .ratCard{
+
+        padding:14px;
+
+    }
+
+    .ratEmoji{
+
+        font-size:36px;
+
+    }
 
 }
