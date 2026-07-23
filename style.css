@@ -225,8 +225,20 @@ button:disabled{
     gap:15px;
 
 }
+.ratCard {
+    cursor: pointer;
+    transition: 0.2s;
+}
 
-.ratCard{
+.ratCard:hover {
+    transform: translateY(-3px);
+}
+
+.ratCard.selected {
+    border: 3px solid #4CAF50;
+    background: #dff6df;
+    transform: scale(1.03);
+}.ratCard{
 
     background:var(--panelLight);
 
