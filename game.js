@@ -634,32 +634,28 @@ function raceLoop(timestamp) {
 
 function updateRacers(delta) {
 
-    let finishedCount = 0;
-
     Game.racers.forEach(rat => {
 
-        if (rat.finished) {
-            finishedCount++;
-            return;
-        }
+        if (rat.finished) return;
 
         // Small random pace changes
-        if (Math.random() < 0.025) {
-
-            const modifier =
-                randomBetween(rat.consistency, rat.burst);
+        if (Math.random() < 0.012) {
 
             rat.targetSpeed =
-                rat.topSpeed * modifier;
+                rat.topSpeed *
+                randomBetween(
+                    rat.consistency,
+                    rat.burst
+                );
 
         }
 
-        // Smooth acceleration toward target speed
+        // Smooth acceleration
         rat.speed +=
             (rat.targetSpeed - rat.speed) *
             rat.acceleration;
 
-        // Stamina slowly affects pace late in race
+        // Stamina effect
         const staminaFactor =
             1 -
             ((rat.distance / TRACK_LENGTH) * (1 - rat.stamina));
@@ -669,24 +665,21 @@ function updateRacers(delta) {
             staminaFactor *
             delta;
 
-        // Finish line
+        // Finish
         if (rat.distance >= TRACK_LENGTH) {
 
             rat.distance = TRACK_LENGTH;
-
             rat.finished = true;
-
             rat.finishTime = Game.raceTime;
 
             Game.results.push(rat);
-
-            finishedCount++;
 
         }
 
     });
 
-    if (finishedCount === TOTAL_RACERS) {
+    // End race when every rat has finished
+    if (Game.racers.every(rat => rat.finished)) {
 
         finishRace();
 
