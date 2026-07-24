@@ -724,11 +724,15 @@ function raceLoop(timestamp) {
 
     updateRacePhase();
 
+    updateRaceDirector(delta);
+
     updateRacers(delta);
 
     updateLeaderboard();
 
     updateTrackSprites();
+
+    updateCommentary(delta);
 
     checkForFinish();
 
