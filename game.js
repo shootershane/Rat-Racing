@@ -865,7 +865,11 @@ function countdownLoop(timestamp) {
 
         Game.countdownStart = timestamp;
 
-        Game.lastCountdown = 3;
+        Game.lastCountdown = 5;
+
+        raceClock.textContent = "5";
+
+        playCountdownBeep();
 
     }
 
@@ -873,7 +877,7 @@ function countdownLoop(timestamp) {
         (timestamp - Game.countdownStart) / 1000;
 
     const count =
-        Math.ceil(3 - elapsed);
+        Math.ceil(5 - elapsed);
 
     if (count > 0) {
 
@@ -882,6 +886,8 @@ function countdownLoop(timestamp) {
             Game.lastCountdown = count;
 
             raceClock.textContent = count;
+
+            playCountdownBeep();
 
         }
 
@@ -893,6 +899,8 @@ function countdownLoop(timestamp) {
 
     raceClock.textContent = "GO!";
 
+    playStarterPistol();
+
     setTimeout(() => {
 
         Game.raceStarted = true;
@@ -901,10 +909,9 @@ function countdownLoop(timestamp) {
 
         requestAnimationFrame(raceLoop);
 
-    },500);
+    }, 500);
 
 }
-
 // ======================================================
 // MAIN RACE LOOP
 // ======================================================
