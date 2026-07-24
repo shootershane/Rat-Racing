@@ -312,7 +312,17 @@ button:disabled{
     font-size:.9rem;
 
 }
+.draftRatImage{
 
+    width:90px;
+
+    height:90px;
+
+    object-fit:contain;
+
+    margin-bottom:12px;
+
+}
 /* ==========================================================
    DRAFT FOOTER
 ========================================================== */
@@ -459,7 +469,29 @@ button:disabled{
     font-size:1rem;
 
 }
+.laneName{
 
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    white-space:nowrap;
+
+    font-size:.9rem;
+
+}
+
+.lanePortrait{
+
+    width:38px;
+
+    height:38px;
+
+    object-fit:contain;
+
+}
 .laneTrack{
 
     position:relative;
@@ -480,9 +512,15 @@ button:disabled{
 
     transform:translateY(-50%);
 
-    font-size:34px;
+    width:72px;
 
-    transition:left .05s linear;
+    height:72px;
+
+    object-fit:contain;
+
+    transition:transform .05s linear;
+
+    pointer-events:none;
 
 }
 
