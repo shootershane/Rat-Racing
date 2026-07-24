@@ -1486,46 +1486,357 @@ let commentaryTimer = 0;
 
 function updateCommentary(delta) {
 
+    // ==================================================
+    // DO NOTHING UNTIL RACE IS RUNNING
+    // ==================================================
+
+    if (!Game.raceStarted || Game.raceFinished)
+        return;
+
+
+    // ==================================================
+    // COMMENTARY TIMER
+    // Prevent announcer from talking constantly
+    // ==================================================
+
     commentaryTimer -= delta;
 
     if (commentaryTimer > 0)
         return;
 
-    commentaryTimer =
-        randomBetween(3,6);
 
-    const log =
-        document.getElementById("commentaryLog");
+    // ==================================================
+    // CURRENT RUNNING ORDER
+    // ==================================================
 
-    if (!log)
+    const racers =
+        [...Game.racers]
+        .filter(rat => !rat.finished)
+        .sort((a, b) =>
+            b.distance - a.distance
+        );
+
+
+    if (racers.length === 0)
         return;
 
-    const leaders =
-        [...Game.racers]
-        .sort((a,b)=>b.distance-a.distance);
 
-    const leader =
-        leaders[0];
+    const leader = racers[0];
 
-    const message =
-        COMMENTARY[
-            Math.floor(
-                Math.random()*COMMENTARY.length
-            )
+    const second = racers[1];
+
+    const racePercent =
+        leader.distance / TRACK_LENGTH;
+
+
+    // ==================================================
+    // COMMENTARY DISPLAY
+    // ==================================================
+
+    const log =
+        document.getElementById(
+            "commentaryLog"
+        );
+
+
+    function announce(message) {
+
+        // ------------------------------
+        // Put commentary on screen
+        // ------------------------------
+
+        if (log) {
+
+            const line =
+                document.createElement(
+                    "div"
+                );
+
+            line.textContent =
+                message;
+
+            log.prepend(line);
+
+
+            while (
+                log.children.length > 8
+            ) {
+
+                log.removeChild(
+                    log.lastChild
+                );
+
+            }
+
+        }
+
+
+        // ------------------------------
+        // Speak commentary
+        // ------------------------------
+
+        speakCommentary(message);
+
+
+        // ------------------------------
+        // Wait before next announcement
+        // ------------------------------
+
+        commentaryTimer =
+            randomBetween(4.5, 7.0);
+
+    }
+
+
+    // ==================================================
+    // FIRST LEADER
+    // ==================================================
+
+    if (!Game.lastAnnouncedLeader) {
+
+        Game.lastAnnouncedLeader =
+            leader.id;
+
+        const lines = [
+
+            `${leader.name} jumps out to the early lead!`,
+
+            `${leader.name} gets a great start and takes the lead!`,
+
+            `${leader.name} is showing the way early!`,
+
+            `It's ${leader.name} out in front!`
+
         ];
 
-    const line =
-        document.createElement("div");
+        announce(
+            lines[
+                Math.floor(
+                    Math.random() *
+                    lines.length
+                )
+            ]
+        );
 
-    line.textContent =
-        `${leader.name}: ${message}`;
+        return;
 
-    log.prepend(line);
+    }
 
-    while (log.children.length > 8) {
 
-        log.removeChild(
-            log.lastChild
+    // ==================================================
+    // LEAD CHANGE
+    // ==================================================
+
+    if (
+        leader.id !==
+        Game.lastAnnouncedLeader
+    ) {
+
+        Game.lastAnnouncedLeader =
+            leader.id;
+
+        const lines = [
+
+            `${leader.name} takes the lead!`,
+
+            `Here comes ${leader.name}! ${leader.name} moves out in front!`,
+
+            `${leader.name} has taken over the top spot!`,
+
+            `Look at ${leader.name}! A big move into the lead!`,
+
+            `${leader.name} surges to the front!`
+
+        ];
+
+        announce(
+            lines[
+                Math.floor(
+                    Math.random() *
+                    lines.length
+                )
+            ]
+        );
+
+        return;
+
+    }
+
+
+    // ==================================================
+    // FINAL STRETCH
+    // ==================================================
+
+    if (
+        racePercent >= 0.78 &&
+        !Game.finalStretchAnnounced
+    ) {
+
+        Game.finalStretchAnnounced =
+            true;
+
+        const lines = [
+
+            `They're coming down the stretch!`,
+
+            `Here they come! It's the final stretch!`,
+
+            `The finish line is coming up fast!`,
+
+            `We're into the final stretch, and ${leader.name} leads the way!`
+
+        ];
+
+        announce(
+            lines[
+                Math.floor(
+                    Math.random() *
+                    lines.length
+                )
+            ]
+        );
+
+        return;
+
+    }
+
+
+    // ==================================================
+    // CLOSE BATTLE FOR THE LEAD
+    // ==================================================
+
+    if (second) {
+
+        const gap =
+            leader.distance -
+            second.distance;
+
+
+        if (
+            gap < TRACK_LENGTH * 0.025 &&
+            racePercent > 0.35
+        ) {
+
+            const lines = [
+
+                `${leader.name} and ${second.name} are neck and neck!`,
+
+                `${second.name} is right on ${leader.name}'s tail!`,
+
+                `What a battle! ${leader.name} and ${second.name} are side by side!`,
+
+                `${leader.name} can't shake ${second.name}!`,
+
+                `${second.name} is putting serious pressure on ${leader.name}!`
+
+            ];
+
+            announce(
+                lines[
+                    Math.floor(
+                        Math.random() *
+                        lines.length
+                    )
+                ]
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    // ==================================================
+    // LEADER PULLING AWAY
+    // ==================================================
+
+    if (second) {
+
+        const gap =
+            leader.distance -
+            second.distance;
+
+
+        if (
+            gap > TRACK_LENGTH * 0.08 &&
+            racePercent > 0.40
+        ) {
+
+            const lines = [
+
+                `${leader.name} is starting to pull away!`,
+
+                `${leader.name} has opened up a big lead!`,
+
+                `They're going to have to catch ${leader.name}!`,
+
+                `${leader.name} is absolutely flying right now!`
+
+            ];
+
+            announce(
+                lines[
+                    Math.floor(
+                        Math.random() *
+                        lines.length
+                    )
+                ]
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    // ==================================================
+    // GENERAL MID-RACE COMMENTARY
+    // ==================================================
+
+    const middlePack =
+        racers.slice(
+            1,
+            Math.min(6, racers.length)
+        );
+
+
+    if (middlePack.length > 0) {
+
+        const randomRat =
+            middlePack[
+                Math.floor(
+                    Math.random() *
+                    middlePack.length
+                )
+            ];
+
+
+        const lines = [
+
+            `${randomRat.name} is looking for an opening!`,
+
+            `${randomRat.name} is trying to make a move!`,
+
+            `Keep an eye on ${randomRat.name}!`,
+
+            `${randomRat.name} is hanging right in there!`,
+
+            `The pack is tightening up behind ${leader.name}!`,
+
+            `${leader.name} still leads, but this race is far from over!`
+
+        ];
+
+
+        announce(
+            lines[
+                Math.floor(
+                    Math.random() *
+                    lines.length
+                )
+            ]
         );
 
     }
