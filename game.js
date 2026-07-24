@@ -5,7 +5,30 @@
 // Milestone 3
 // Foundation + Draft + Race Setup
 // ======================================================
+// ======================================================
+// AUDIO
+// ======================================================
 
+const countdownBeep = new Audio("assets/audio/countdown_beep.wav");
+const starterPistol = new Audio("assets/audio/starter_pistol.wav");
+
+countdownBeep.preload = "auto";
+starterPistol.preload = "auto";
+
+countdownBeep.volume = 0.7;
+starterPistol.volume = 0.9;
+
+function playCountdownBeep() {
+    countdownBeep.pause();
+    countdownBeep.currentTime = 0;
+    countdownBeep.play().catch(() => {});
+}
+
+function playStarterPistol() {
+    starterPistol.pause();
+    starterPistol.currentTime = 0;
+    starterPistol.play().catch(() => {});
+}
 // ======================================================
 // GAME SETTINGS
 // ======================================================
