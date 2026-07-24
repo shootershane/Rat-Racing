@@ -853,16 +853,15 @@ function updateRaceDirector(delta) {
 function updateRacers(delta) {
 
     // Current running order
-    const order = [...Game.racers].sort(
-        (a, b) => b.distance - a.distance
-    );
+    const order = [...Game.racers]
+        .sort((a, b) => b.distance - a.distance);
 
     Game.racers.forEach(rat => {
 
         if (rat.finished)
             return;
 
-        // Natural reaction at the start
+        // Wait for reaction time
         if (!rat.started) {
 
             if (Game.raceTime < rat.reactionDelay)
@@ -872,49 +871,40 @@ function updateRacers(delta) {
 
         }
 
-        // Current race position
+        // Current position
         const position =
             order.findIndex(r => r.id === rat.id) + 1;
 
-        // Default pace
+        // Base target boost
         let targetBoost = 1.00;
 
-        // Slight drafting effect
-        if (position > 1 && position < Game.racers.length) {
+        // Small drafting bonus
+        if (position > 1)
+            targetBoost += 0.01;
 
-            targetBoost += 0.015;
-
-        }
-
-        // Leader works harder
-        if (position === 1) {
-
+        // Leader works slightly harder
+        if (position === 1)
             targetBoost -= 0.01;
 
-        }
+        // Finish stretch
+        if (Game.phase === "finish")
+            targetBoost += 0.05;
 
-        // Final stretch
-        if (Game.phase === "finish") {
-
-            targetBoost += 0.06;
-
-        }
-
-        // Temporary race event
+        // Race Director controls the story
         targetBoost *= rat.storyBoost;
 
-        // Smoothly transition toward target
+        // Smoothly chase target boost
         rat.boost +=
             (targetBoost - rat.boost) *
-            2.5 *
+            3 *
             delta;
 
-        // Desired running speed
+        // Desired speed
         const targetSpeed =
             rat.baseSpeed *
             rat.boost;
 
-        // Smooth acceleration/deceleration
+        // Accelerate toward target
         if (rat.speed < targetSpeed) {
 
             rat.speed +=
@@ -935,50 +925,20 @@ function updateRacers(delta) {
 
         }
 
-        // Tiny natural stride variation
-        rat.speed *= randomBetween(0.998, 1.002);
+        // Tiny stride variation
+        rat.speed *= randomBetween(0.999, 1.001);
 
+        // Clamp speed
         if (rat.speed > rat.maxSpeed)
             rat.speed = rat.maxSpeed;
 
         if (rat.speed < 0)
             rat.speed = 0;
 
-        // Move
+        // Move rat
         rat.distance +=
             rat.speed *
             delta;
-
-        // Story event timer
-        rat.storyTime -= delta;
-
-        if (rat.storyTime <= 0) {
-
-            rat.storyTime =
-                randomBetween(3, 7);
-
-            const roll = Math.random();
-
-            if (roll < 0.15) {
-
-                // Small stumble
-                rat.storyBoost = 0.96;
-
-            }
-            else if (roll < 0.35) {
-
-                // Nice surge
-                rat.storyBoost = 1.05;
-
-            }
-            else {
-
-                // Normal pace
-                rat.storyBoost = 1.00;
-
-            }
-
-        }
 
         // Finish
         if (rat.distance >= TRACK_LENGTH) {
