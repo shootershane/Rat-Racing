@@ -813,8 +813,7 @@ function raceLoop(timestamp) {
 
 function updateRacePhase() {
 
-    const percent =
-        Game.raceTime / RACE_DURATION;
+   const racePercent = Game.raceTime / RACE_DURATION;
 
     if (percent < .25) {
 
