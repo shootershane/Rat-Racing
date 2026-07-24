@@ -1073,6 +1073,107 @@ function updateRaceDirector(delta) {
     });
 
 }
+function updateRacers(delta) {
+
+    Game.racers.forEach(rat => {
+
+        if (rat.finished)
+            return;
+
+        // -------------------------
+        // Reaction delay
+        // -------------------------
+
+        if (!rat.started) {
+
+            if (Game.raceTime >= rat.reactionDelay) {
+
+                rat.started = true;
+
+            } else {
+
+                return;
+
+            }
+
+        }
+
+        // -------------------------
+        // Move the rat
+        // -------------------------
+
+        rat.distance +=
+            rat.speed * delta;
+
+        // Never allow overshooting
+        rat.distance = Math.min(
+            rat.distance,
+            TRACK_LENGTH
+        );
+
+        // -------------------------
+        // Finish
+        // -------------------------
+
+        if (
+            rat.distance >= TRACK_LENGTH &&
+            !rat.finished
+        ) {
+
+            rat.finished = true;
+
+            rat.finishTime =
+                Game.raceTime;
+
+            Game.results.push(rat);
+
+        }
+
+    });
+
+    // -------------------------
+    // Current running order
+    // -------------------------
+
+    Game.racers.sort(
+
+        (a,b) => {
+
+            if (a.finished && b.finished)
+                return a.finishTime - b.finishTime;
+
+            if (a.finished)
+                return -1;
+
+            if (b.finished)
+                return 1;
+
+            return b.distance - a.distance;
+
+        }
+
+    );
+
+    // -------------------------
+    // Race complete
+    // -------------------------
+
+    if (
+
+        !Game.raceFinished &&
+
+        Game.results.length ===
+        Game.racers.length
+
+    ) {
+
+        Game.raceFinished = true;
+
+        finishRace();
+
+    }
+
+}
 // ======================================================
 // UPDATE TRACK SPRITES
 // ======================================================
