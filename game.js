@@ -848,7 +848,7 @@ function initializeRaceEngine() {
 
     );
 
-    raceClock.textContent = "3";
+    raceClock.textContent = "5";
 
     requestAnimationFrame(
         countdownLoop
