@@ -769,3 +769,26 @@ button:disabled{
     }
 
 }
+.draftRatImage{
+    width:90px;
+    height:90px;
+    object-fit:contain;
+}
+
+.lanePortrait{
+    width:42px;
+    height:42px;
+    object-fit:contain;
+    margin-right:8px;
+    vertical-align:middle;
+}
+
+.ratSprite{
+    position:absolute;
+    width:72px;
+    height:72px;
+    object-fit:contain;
+    left:0;
+    top:-18px;
+    transition:transform .08s linear;
+}
