@@ -781,67 +781,84 @@ function updateRaceDirector(delta) {
     if (Game.storyTimer > 0)
         return;
 
-    // Wait before the next race event
-    Game.storyTimer = randomBetween(2.5, 5.5);
+    Game.storyTimer = randomBetween(2.5, 5.0);
 
-    // Clear all temporary boosts
-    Game.racers.forEach(rat => {
+    const order = [...Game.racers]
+        .filter(r => !r.finished)
+        .sort((a, b) => b.distance - a.distance);
 
-        rat.storyBoost = 1;
+    if (order.length < 2)
+        return;
+
+    // Reset everyone's temporary boost
+    Game.racers.forEach(r => {
+
+        r.storyBoost = 1.00;
 
     });
 
-    // Current running order
-    const order = [...Game.racers]
-        .sort((a, b) => b.distance - a.distance);
-
     const roll = Math.random();
 
-    // -----------------------------
-    // Leader gets challenged
-    // -----------------------------
-    if (roll < 0.25) {
+    // -------------------------------------------------
+    // 25% Leader starts pulling away
+    // -------------------------------------------------
 
-        if (order.length > 1) {
+    if (roll < .25) {
 
-            order[1].storyBoost = 1.08;
-
-        }
+        order[0].storyBoost = 1.05;
 
     }
 
-    // -----------------------------
-    // Mid-pack charge
-    // -----------------------------
-    else if (roll < 0.50) {
+    // -------------------------------------------------
+    // 25% Second place attacks leader
+    // -------------------------------------------------
 
-        const mid =
-            order[Math.floor(randomBetween(3, 8))];
+    else if (roll < .50) {
 
-        if (mid)
-            mid.storyBoost = 1.10;
+        order[1].storyBoost = 1.08;
 
     }
 
-    // -----------------------------
-    // Back marker catches fire
-    // -----------------------------
-    else if (roll < 0.75) {
+    // -------------------------------------------------
+    // 20% Mid-pack move
+    // -------------------------------------------------
 
-        const back =
-            order[Math.floor(randomBetween(8, 12))];
+    else if (roll < .70) {
 
-        if (back)
-            back.storyBoost = 1.12;
+        const start = Math.min(3, order.length - 1);
+        const end = Math.min(7, order.length - 1);
+
+        const racer =
+            order[Math.floor(randomBetween(start, end + 1))];
+
+        if (racer)
+            racer.storyBoost = 1.10;
 
     }
 
-    // -----------------------------
-    // Leader loses momentum
-    // -----------------------------
+    // -------------------------------------------------
+    // 20% Back marker charge
+    // -------------------------------------------------
+
+    else if (roll < .90) {
+
+        const start = Math.max(order.length - 4, 0);
+
+        const racer =
+            order[Math.floor(randomBetween(start, order.length))];
+
+        if (racer)
+            racer.storyBoost = 1.12;
+
+    }
+
+    // -------------------------------------------------
+    // 10% Leader fades briefly
+    // -------------------------------------------------
+
     else {
 
-        order[0].storyBoost = 0.95;
+        order[0].storyBoost = .94;
 
     }
 
