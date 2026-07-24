@@ -207,7 +207,7 @@ function buildRatGrid() {
 
             <h3>${rat.name}</h3>
 
-            <p>Rat #${rat.id}</p>
+    
 
         `;
 
