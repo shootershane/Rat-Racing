@@ -774,15 +774,16 @@ function updateRacePhase() {
 function updateRacers(delta) {
 
     // Current running order
-    const order = [...Game.racers]
-        .sort((a, b) => b.distance - a.distance);
+    const order = [...Game.racers].sort(
+        (a, b) => b.distance - a.distance
+    );
 
     Game.racers.forEach(rat => {
 
         if (rat.finished)
             return;
 
-        // Reaction delay
+        // Natural reaction at the start
         if (!rat.started) {
 
             if (Game.raceTime < rat.reactionDelay)
@@ -792,101 +793,54 @@ function updateRacers(delta) {
 
         }
 
-        // Current position
+        // Current race position
         const position =
             order.findIndex(r => r.id === rat.id) + 1;
 
-        // Change behavior every few seconds
-        rat.stateTimer -= delta;
+        // Default pace
+        let targetBoost = 1.00;
 
-        if (rat.stateTimer <= 0) {
+        // Slight drafting effect
+        if (position > 1 && position < Game.racers.length) {
 
-            rat.stateTimer =
-                randomBetween(1.5, 3.5);
-
-            let roll = Math.random();
-
-            if (position <= 3) {
-
-                // Leaders sometimes cool off
-                if (roll < .40)
-                    rat.state = "recover";
-                else if (roll < .80)
-                    rat.state = "steady";
-                else
-                    rat.state = "push";
-
-            }
-            else if (position >= 9) {
-
-                // Back markers gamble
-                if (roll < .55)
-                    rat.state = "push";
-                else if (roll < .80)
-                    rat.state = "steady";
-                else
-                    rat.state = "recover";
-
-            }
-            else {
-
-                // Mid-pack races hardest
-                if (roll < .30)
-                    rat.state = "recover";
-                else if (roll < .65)
-                    rat.state = "steady";
-                else
-                    rat.state = "push";
-
-            }
+            targetBoost += 0.015;
 
         }
 
-        // Smooth boost changes
-        let targetBoost = 1;
+        // Leader works harder
+        if (position === 1) {
 
-        switch (rat.state) {
-
-            case "recover":
-                targetBoost = 0.93;
-                break;
-
-            case "steady":
-                targetBoost = 1.00;
-                break;
-
-            case "push":
-                targetBoost = 1.10;
-                break;
+            targetBoost -= 0.01;
 
         }
 
         // Final stretch
         if (Game.phase === "finish") {
 
-            targetBoost *= rat.sprint;
-
-            // Back half attacks harder
-            if (position > 6)
-                targetBoost *= 1.03;
+            targetBoost += 0.06;
 
         }
 
-        // Smooth transition
+        // Temporary race event
+        targetBoost *= rat.storyBoost;
+
+        // Smoothly transition toward target
         rat.boost +=
             (targetBoost - rat.boost) *
-            2.5 * delta;
+            2.5 *
+            delta;
 
-        // Accelerate toward target speed
+        // Desired running speed
         const targetSpeed =
             rat.baseSpeed *
-            rat.boost *
-            rat.consistency;
+            rat.boost;
 
+        // Smooth acceleration/deceleration
         if (rat.speed < targetSpeed) {
 
             rat.speed +=
-                rat.acceleration * delta;
+                rat.acceleration *
+                delta;
 
             if (rat.speed > targetSpeed)
                 rat.speed = targetSpeed;
@@ -894,17 +848,17 @@ function updateRacers(delta) {
         } else {
 
             rat.speed -=
-                rat.acceleration * .9 * delta;
+                rat.acceleration *
+                delta;
 
             if (rat.speed < targetSpeed)
                 rat.speed = targetSpeed;
 
         }
 
-        // Small random wobble
-        rat.speed *= randomBetween(.995, 1.005);
+        // Tiny natural stride variation
+        rat.speed *= randomBetween(0.998, 1.002);
 
-        // Never exceed max speed
         if (rat.speed > rat.maxSpeed)
             rat.speed = rat.maxSpeed;
 
@@ -913,8 +867,41 @@ function updateRacers(delta) {
 
         // Move
         rat.distance +=
-            rat.speed * delta;
+            rat.speed *
+            delta;
 
+        // Story event timer
+        rat.storyTime -= delta;
+
+        if (rat.storyTime <= 0) {
+
+            rat.storyTime =
+                randomBetween(3, 7);
+
+            const roll = Math.random();
+
+            if (roll < 0.15) {
+
+                // Small stumble
+                rat.storyBoost = 0.96;
+
+            }
+            else if (roll < 0.35) {
+
+                // Nice surge
+                rat.storyBoost = 1.05;
+
+            }
+            else {
+
+                // Normal pace
+                rat.storyBoost = 1.00;
+
+            }
+
+        }
+
+        // Finish
         if (rat.distance >= TRACK_LENGTH) {
 
             rat.distance = TRACK_LENGTH;
