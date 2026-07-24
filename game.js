@@ -30,6 +30,79 @@ function playStarterPistol() {
     starterPistol.play().catch(() => {});
 }
 // ======================================================
+// RACE ANNOUNCER
+// ======================================================
+
+let announcerVoice = null;
+
+function loadAnnouncerVoice() {
+
+    const voices = window.speechSynthesis.getVoices();
+
+    if (!voices.length)
+        return;
+
+    // Try to find a good English male voice first
+    announcerVoice =
+        voices.find(voice =>
+            voice.lang.startsWith("en") &&
+            (
+                voice.name.includes("Guy") ||
+                voice.name.includes("David") ||
+                voice.name.includes("Mark") ||
+                voice.name.includes("Daniel")
+            )
+        );
+
+    // Otherwise use any available English voice
+    if (!announcerVoice) {
+
+        announcerVoice =
+            voices.find(voice =>
+                voice.lang.startsWith("en")
+            );
+
+    }
+
+}
+
+window.speechSynthesis.onvoiceschanged =
+    loadAnnouncerVoice;
+
+loadAnnouncerVoice();
+
+
+function speakCommentary(text, onFinished = null) {
+
+    window.speechSynthesis.cancel();
+
+    const speech =
+        new SpeechSynthesisUtterance(text);
+
+    if (announcerVoice) {
+
+        speech.voice =
+            announcerVoice;
+
+    }
+
+    speech.rate = 1.05;
+    speech.pitch = 0.85;
+    speech.volume = 1.0;
+
+    if (onFinished) {
+
+        speech.onend =
+            onFinished;
+
+    }
+
+    window.speechSynthesis.speak(
+        speech
+    );
+
+}
+// ======================================================
 // GAME SETTINGS
 // ======================================================
 
@@ -861,6 +934,39 @@ function initializeRaceEngine() {
 
 function countdownLoop(timestamp) {
 
+    // ==================================================
+    // ANNOUNCER INTRO
+    // ==================================================
+
+    if (!Game.announcerIntroStarted) {
+
+        Game.announcerIntroStarted = true;
+
+        raceClock.textContent = "GET READY!";
+
+        speakCommentary(
+            "Ladies and gentlemen, welcome to Rat Racing! The rats are at the line, and we are ready to race!",
+            () => {
+
+                // Start countdown AFTER announcer finishes
+                Game.countdownStart = null;
+
+                requestAnimationFrame(
+                    countdownLoop
+                );
+
+            }
+        );
+
+        return;
+
+    }
+
+
+    // ==================================================
+    // START COUNTDOWN
+    // ==================================================
+
     if (!Game.countdownStart) {
 
         Game.countdownStart = timestamp;
@@ -873,11 +979,17 @@ function countdownLoop(timestamp) {
 
     }
 
+
     const elapsed =
         (timestamp - Game.countdownStart) / 1000;
 
     const count =
         Math.ceil(5 - elapsed);
+
+
+    // ==================================================
+    // COUNTDOWN
+    // ==================================================
 
     if (count > 0) {
 
@@ -891,23 +1003,34 @@ function countdownLoop(timestamp) {
 
         }
 
-        requestAnimationFrame(countdownLoop);
+        requestAnimationFrame(
+            countdownLoop
+        );
 
         return;
 
     }
 
+
+    // ==================================================
+    // GO!
+    // ==================================================
+
     raceClock.textContent = "GO!";
 
     playStarterPistol();
+
 
     setTimeout(() => {
 
         Game.raceStarted = true;
 
-        Game.lastFrame = performance.now();
+        Game.lastFrame =
+            performance.now();
 
-        requestAnimationFrame(raceLoop);
+        requestAnimationFrame(
+            raceLoop
+        );
 
     }, 500);
 
