@@ -620,6 +620,52 @@ function initializeRaceEngine() {
 
     Game.storyTimer = randomBetween(2.5, 4.5);
 
+    const archetypes = [
+
+        {
+            name: "Fast Starter",
+            launch: 1.08,
+            cruise: 0.99,
+            finish: 0.96
+        },
+
+        {
+            name: "Late Closer",
+            launch: 0.96,
+            cruise: 1.00,
+            finish: 1.09
+        },
+
+        {
+            name: "Surger",
+            launch: 0.99,
+            cruise: 1.08,
+            finish: 0.98
+        },
+
+        {
+            name: "Steady",
+            launch: 1.02,
+            cruise: 1.02,
+            finish: 1.02
+        },
+
+        {
+            name: "Hot & Cold",
+            launch: 1.07,
+            cruise: 0.96,
+            finish: 1.07
+        },
+
+        {
+            name: "Strong Finisher",
+            launch: 1.00,
+            cruise: 0.99,
+            finish: 1.10
+        }
+
+    ];
+
     Game.racers.forEach(rat => {
 
         rat.distance = 0;
@@ -630,21 +676,38 @@ function initializeRaceEngine() {
 
         rat.started = false;
 
-        // Small human-like reaction difference
         rat.reactionDelay = randomBetween(0.05, 0.40);
 
-        // EVERY RAT IS IDENTICAL
+        // Physics (same for everyone)
         rat.acceleration = 14;
         rat.baseSpeed = 29;
         rat.maxSpeed = 38;
 
-        // Movement values
         rat.boost = 1;
         rat.targetBoost = 1;
 
-        // Temporary race event
+        // AI values
         rat.storyBoost = 1;
-        rat.storyTime = 0;
+
+        rat.confidence = 1.00;
+        rat.momentum = 1.00;
+
+        // Assign a random race archetype
+        const profile =
+            archetypes[Math.floor(Math.random() * archetypes.length)];
+
+        rat.raceProfile = profile;
+
+        // Small variation so rats with the same archetype
+        // don't behave identically
+        rat.launchFactor =
+            profile.launch * randomBetween(0.985, 1.015);
+
+        rat.cruiseFactor =
+            profile.cruise * randomBetween(0.985, 1.015);
+
+        rat.finishFactor =
+            profile.finish * randomBetween(0.985, 1.015);
 
     });
 
