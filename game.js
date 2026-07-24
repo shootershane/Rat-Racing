@@ -11,7 +11,7 @@
 // ======================================================
 
 const TOTAL_RACERS = 12;
-const TRACK_LENGTH = 1000;
+const TRACK_LENGTH = 1500;
 
 // ======================================================
 // APP STATE
@@ -599,7 +599,7 @@ console.log("Milestone 3 Loaded");
 // PART 1
 // ======================================================
 
-const RACE_DURATION = 30;
+const RACE_DURATION = 45;
 
 function randomBetween(min, max) {
     return Math.random() * (max - min) + min;
