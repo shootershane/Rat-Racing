@@ -260,7 +260,7 @@ button:disabled{
 
     border-radius:14px;
 
-    padding:20px;
+    padding:12px;
 
     text-align:center;
 
@@ -314,13 +314,13 @@ button:disabled{
 }
 .draftRatImage{
 
-    width:90px;
+    width:120px;
 
-    height:90px;
+    height:120px;
 
     object-fit:contain;
-
-    margin-bottom:12px;
+   display;block;
+   margin:0 auto 12px;
 
 }
 /* ==========================================================
