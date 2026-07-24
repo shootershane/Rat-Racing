@@ -956,223 +956,96 @@ function updateRacePhase() {
 function updateRaceDirector(delta) {
 
     const racePercent =
-        Game.raceTime / RACE_DURATION;
-
-    Game.racers.sort(
-        (a, b) => b.distance - a.distance
-    );
-
-    const leaderDistance =
-        Game.racers[0].distance;
-
-    Game.racers.forEach((rat, index) => {
-
-        let target =
-            rat.baseSpeed;
-
-        // -------------------------
-        // Race script influence
-        // -------------------------
-
-        if (racePercent < 0.25) {
-
-            target *= rat.launchFactor;
-
-        }
-        else if (racePercent < 0.75) {
-
-            target *= rat.middleFactor;
-
-        }
-        else {
-
-            target *= rat.finishFactor;
-
-        }
-
-        // -------------------------
-        // Hidden role behavior
-        // -------------------------
-
-        switch (rat.role) {
-
-            case "Leader":
-
-                if (index === 0) {
-
-                    target *= 1.05;
-
-                }
-
-                break;
-
-            case "Closer":
-
-                if (racePercent > 0.70) {
-
-                    target *=
-                        1.08 * rat.clutch;
-
-                }
-
-                break;
-
-            case "Grinder":
-
-                target *= rat.stamina;
-
-                break;
-
-            case "Sprinter":
-
-                if (racePercent < 0.20) {
-
-                    target *= 1.08;
-
-                }
-
-                break;
-
-            case "Chaser":
-
-                if (index > 0 && index < 5) {
-
-                    target *=
-                        1.03 * rat.passing;
-
-                }
-
-                break;
-
-            case "Wildcard":
-
-                target *=
-                    randomBetween(
-                        0.97,
-                        1.03
-                    );
-
-                break;
-
-        }
-
-        // -------------------------
-        // Pack positioning
-        // -------------------------
-
-        const gap =
-            leaderDistance - rat.distance;
-
-        if (gap > 180) {
-
-            target *= 1.08;
-
-        }
-        else if (gap > 100) {
-
-            target *= 1.04;
-
-        }
-        else if (gap < 20 && index === 0) {
-
-            target *= 0.98;
-
-        }
-                // -------------------------
-        // Confidence
-        // -------------------------
-
-        if (index === 0) {
-
-            rat.confidence +=
-                0.10 * delta;
-
-        }
-        else {
-
-            rat.confidence -=
-                0.03 * delta;
-
-        }
-
-        rat.confidence = Math.max(
-            0.90,
-            Math.min(
-                1.15,
-                rat.confidence
-            )
+        Math.min(
+            Game.raceTime / RACE_DURATION,
+            1
         );
-
-        target *= rat.confidence;
-
-        // -------------------------
-        // Random surges
-        // -------------------------
-
-        if (Math.random() < 0.006) {
-
-            rat.targetBoost =
-                randomBetween(
-                    1.03,
-                    1.10
-                );
-
-        }
-
-        rat.boost +=
-            (rat.targetBoost - rat.boost) *
-            delta * 2.0;
-
-        target *= rat.boost;
-
-        if (
-            Math.abs(
-                rat.boost -
-                rat.targetBoost
-            ) < 0.01
-        ) {
-
-            rat.targetBoost = 1.0;
-
-        }
-
-        // -------------------------
-        // Smooth target speed
-        // -------------------------
-
-        rat.targetSpeed = Math.min(
-            target,
-            rat.maxSpeed
-        );
-
-    });
-
-}
-// ======================================================
-// UPDATE RACERS
-// ======================================================
-
-function updateRacers(delta) {
 
     Game.racers.forEach(rat => {
 
-        if (rat.finished) return;
-
         // -------------------------
-        // Reaction delay
+        // Determine progress toward finish
         // -------------------------
 
-        if (!rat.started) {
+        let progress =
+            Game.raceTime /
+            rat.targetFinishTime;
 
-            if (Game.raceTime >= rat.reactionDelay) {
+        progress =
+            Math.max(
+                0,
+                Math.min(progress,1)
+            );
 
-                rat.started = true;
+        // -------------------------
+        // Shape the race
+        // -------------------------
 
-            } else {
+        let shapedProgress =
+            progress;
 
-                return;
+        if (progress < 0.33) {
 
-            }
+            shapedProgress *=
+                rat.startBias;
+
+        }
+        else if (progress < 0.75) {
+
+            shapedProgress *=
+                rat.middleBias;
+
+        }
+        else {
+
+            shapedProgress *=
+                rat.finishBias;
+
+        }
+
+        shapedProgress =
+            Math.max(
+                0,
+                Math.min(
+                    shapedProgress,
+                    1
+                )
+            );
+
+        // -------------------------
+        // Desired location
+        // -------------------------
+
+        const targetDistance =
+            shapedProgress *
+            TRACK_LENGTH;
+
+        const distanceError =
+            targetDistance -
+            rat.distance;
+
+        let desiredSpeed =
+            distanceError * 2.8;
+                // -------------------------
+        // Small race randomness
+        // -------------------------
+
+        desiredSpeed *= randomBetween(
+            0.985,
+            1.015
+        );
+
+        // -------------------------
+        // Temporary surges
+        // -------------------------
+
+        if (Math.random() < 0.003) {
+
+            desiredSpeed *=
+                randomBetween(
+                    1.05,
+                    1.12
+                );
 
         }
 
@@ -1180,157 +1053,24 @@ function updateRacers(delta) {
         // Smooth acceleration
         // -------------------------
 
-        const accelRate =
-            rat.acceleration * delta;
-
-        if (rat.speed < rat.targetSpeed) {
-
-            rat.speed = Math.min(
-                rat.speed + accelRate,
-                rat.targetSpeed
-            );
-
-        } else {
-
-            rat.speed = Math.max(
-                rat.speed - accelRate * 0.8,
-                rat.targetSpeed
-            );
-
-        }
+        rat.speed +=
+            (desiredSpeed - rat.speed) *
+            rat.acceleration *
+            delta * 4;
 
         // -------------------------
-        // Fatigue
+        // Prevent impossible speeds
         // -------------------------
 
-        const racePercent =
-            Game.raceTime / RACE_DURATION;
-
-        let fatigue = 1.0;
-
-        if (racePercent > 0.55) {
-
-            fatigue -=
-                (racePercent - 0.55) *
-                0.18 *
-                (2 - rat.stamina);
-
-        }
-
-        // -------------------------
-        // Drafting
-        // -------------------------
-
-        let draftBonus = 1.0;
-
-        Game.racers.forEach(other => {
-
-            if (other === rat) return;
-
-            const gap =
-                other.distance - rat.distance;
-
-            if (gap > 15 && gap < 70) {
-
-                draftBonus = Math.max(
-                    draftBonus,
-                    1.025
-                );
-
-            }
-
-        });
-
-        // -------------------------
-        // Passing bonus
-        // -------------------------
-
-        let passBonus = 1.0;
-
-        Game.racers.forEach(other => {
-
-            if (other === rat) return;
-
-            const gap =
-                other.distance - rat.distance;
-
-            if (gap > 0 && gap < 35) {
-
-                passBonus =
-                    Math.max(
-                        passBonus,
-                        rat.passing
-                    );
-
-            }
-
-        });
-
-        let finalSpeed =
-            rat.speed *
-            fatigue *
-            draftBonus *
-            passBonus;
-                // -------------------------
-        // Small random movement
-        // -------------------------
-
-        finalSpeed *= randomBetween(
-            0.998,
-            1.002
+        rat.speed = Math.max(
+            8,
+            Math.min(
+                rat.speed,
+                55
+            )
         );
 
-        // -------------------------
-        // Move the rat
-        // -------------------------
-
-        rat.distance +=
-            finalSpeed * delta;
-
-        rat.speed = finalSpeed;
-
-        // -------------------------
-        // Finish detection
-        // -------------------------
-
-        if (rat.distance >= TRACK_LENGTH) {
-
-            rat.distance =
-                TRACK_LENGTH;
-
-            rat.finished = true;
-
-            rat.finishTime =
-                Game.raceTime;
-
-            Game.results.push(rat);
-
-        }
-
     });
-
-    // -------------------------
-    // Keep leaderboard updated
-    // -------------------------
-
-    Game.racers.sort(
-        (a, b) => b.distance - a.distance
-    );
-
-    // -------------------------
-    // End race
-    // -------------------------
-
-    if (
-        !Game.raceFinished &&
-        Game.results.length === Game.racers.length
-    ) {
-
-        Game.raceFinished = true;
-
-        finishRace();
-
-    }
 
 }
 // ======================================================
