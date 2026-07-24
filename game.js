@@ -766,7 +766,82 @@ function updateRacePhase() {
     }
 
 }
+// ======================================================
+// RACE DIRECTOR
+// ======================================================
 
+function updateRaceDirector(delta) {
+
+    Game.storyTimer -= delta;
+
+    if (Game.storyTimer > 0)
+        return;
+
+    // Wait before the next race event
+    Game.storyTimer = randomBetween(2.5, 5.5);
+
+    // Clear all temporary boosts
+    Game.racers.forEach(rat => {
+
+        rat.storyBoost = 1;
+
+    });
+
+    // Current running order
+    const order = [...Game.racers]
+        .sort((a, b) => b.distance - a.distance);
+
+    const roll = Math.random();
+
+    // -----------------------------
+    // Leader gets challenged
+    // -----------------------------
+    if (roll < 0.25) {
+
+        if (order.length > 1) {
+
+            order[1].storyBoost = 1.08;
+
+        }
+
+    }
+
+    // -----------------------------
+    // Mid-pack charge
+    // -----------------------------
+    else if (roll < 0.50) {
+
+        const mid =
+            order[Math.floor(randomBetween(3, 8))];
+
+        if (mid)
+            mid.storyBoost = 1.10;
+
+    }
+
+    // -----------------------------
+    // Back marker catches fire
+    // -----------------------------
+    else if (roll < 0.75) {
+
+        const back =
+            order[Math.floor(randomBetween(8, 12))];
+
+        if (back)
+            back.storyBoost = 1.12;
+
+    }
+
+    // -----------------------------
+    // Leader loses momentum
+    // -----------------------------
+    else {
+
+        order[0].storyBoost = 0.95;
+
+    }
+
+}
 // ======================================================
 // UPDATE RACERS
 // ======================================================
