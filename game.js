@@ -610,50 +610,41 @@ function initializeRaceEngine() {
     Game.results = [];
 
     Game.raceStarted = false;
-
     Game.raceFinished = false;
-
     Game.raceTime = 0;
 
     Game.countdownStart = null;
-
     Game.lastFrame = 0;
 
-    Game.phase = "start";
+    Game.phase = "launch";
+
+    Game.storyTimer = randomBetween(2.5, 4.5);
 
     Game.racers.forEach(rat => {
 
         rat.distance = 0;
-
         rat.speed = 0;
 
         rat.finished = false;
-
         rat.finishTime = null;
 
         rat.started = false;
 
-        rat.reactionDelay = randomBetween(0.05,0.80);
+        // Small human-like reaction difference
+        rat.reactionDelay = randomBetween(0.05, 0.40);
 
-        rat.acceleration = randomBetween(11,17);
+        // EVERY RAT IS IDENTICAL
+        rat.acceleration = 14;
+        rat.baseSpeed = 29;
+        rat.maxSpeed = 38;
 
-        rat.baseSpeed = randomBetween(27,31);
-
-        rat.maxSpeed = randomBetween(35,40);
-
-        rat.energy = randomBetween(94,106);
-
-        rat.consistency = randomBetween(.97,1.03);
-
-        rat.sprint = randomBetween(1.04,1.12);
-
-        rat.state = "steady";
-
-        rat.stateTimer = randomBetween(1.5,4);
-
-        rat.eventTimer = randomBetween(2,4);
-
+        // Movement values
         rat.boost = 1;
+        rat.targetBoost = 1;
+
+        // Temporary race event
+        rat.storyBoost = 1;
+        rat.storyTime = 0;
 
     });
 
@@ -662,7 +653,6 @@ function initializeRaceEngine() {
     requestAnimationFrame(countdownLoop);
 
 }
-
 // ======================================================
 // COUNTDOWN
 // ======================================================
