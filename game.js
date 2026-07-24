@@ -43,30 +43,30 @@ const Game = {
 
 const RAT_DATABASE = [
 
-    { id: 1, name: "Cheddar", emoji: "🧀" },
-    { id: 2, name: "Rocket", emoji: "🚀" },
-    { id: 3, name: "Pizza Pete", emoji: "🍕" },
-    { id: 4, name: "Peanut", emoji: "🥜" },
-    { id: 5, name: "Cowboy Jack", emoji: "🤠" },
-    { id: 6, name: "Captain Whiskers", emoji: "🎩" },
-    { id: 7, name: "Shadow", emoji: "🌑" },
-    { id: 8, name: "King Gouda", emoji: "👑" },
-    { id: 9, name: "Chef Alfredo", emoji: "👨‍🍳" },
-    { id: 10, name: "Professor Pip", emoji: "🎓" },
-    { id: 11, name: "Tank", emoji: "💪" },
-    { id: 12, name: "Slick", emoji: "😎" },
-    { id: 13, name: "Ace", emoji: "♠️" },
-    { id: 14, name: "Rusty", emoji: "🔧" },
-    { id: 15, name: "Sparky", emoji: "⚡" },
-    { id: 16, name: "Turbo", emoji: "🏎️" },
-    { id: 17, name: "Riff", emoji: "🎸" },
-    { id: 18, name: "Sergeant Squeak", emoji: "🪖" },
-    { id: 19, name: "Taco", emoji: "🌮" },
-    { id: 20, name: "Donut", emoji: "🍩" },
-    { id: 21, name: "Bubbles", emoji: "🫧" },
-    { id: 22, name: "Dusty", emoji: "🌪️" },
-    { id: 23, name: "Magnet", emoji: "🧲" },
-    { id: 24, name: "Lucky", emoji: "🍀" }
+    { id: 1, name: "Cheddar", image: "images/rats/cheddar.png" },
+    { id: 2, name: "Rocket", image: "images/rats/rocket.png" },
+    { id: 3, name: "Pizza Pete", image: "images/rats/pizzapete.png" },
+    { id: 4, name: "Peanut", image: "images/rats/peanut.png" },
+    { id: 5, name: "Cowboy Jack", image: "images/rats/cowboyjack.png" },
+    { id: 6, name: "Captain Whiskers", image: "images/rats/captainwhiskers.png" },
+    { id: 7, name: "Shadow", image: "images/rats/shadow.png" },
+    { id: 8, name: "King Gouda", image: "images/rats/kinggouda.png" },
+    { id: 9, name: "Chef Alfredo", image: "images/rats/chefalfredo.png" },
+    { id: 10, name: "Professor Pip", image: "images/rats/professorpip.png" },
+    { id: 11, name: "Tank", image: "images/rats/tank.png" },
+    { id: 12, name: "Slick", image: "images/rats/slick.png" },
+    { id: 13, name: "Ace", image: "images/rats/ace.png" },
+    { id: 14, name: "Rusty", image: "images/rats/rusty.png" },
+    { id: 15, name: "Sparky", image: "images/rats/sparky.png" },
+    { id: 16, name: "Turbo", image: "images/rats/turbo.png" },
+    { id: 17, name: "Riff", image: "images/rats/riff.png" },
+    { id: 18, name: "Sergeant Squeak", image: "images/rats/sergeantsqueak.png" },
+    { id: 19, name: "Taco", image: "images/rats/taco.png" },
+    { id: 20, name: "Donut", image: "images/rats/donut.png" },
+    { id: 21, name: "Bubbles", image: "images/rats/bubbles.png" },
+    { id: 22, name: "Dusty", image: "images/rats/dusty.png" },
+    { id: 23, name: "Magnet", image: "images/rats/magnet.png" },
+    { id: 24, name: "Lucky", image: "images/rats/lucky.png" }
 
 ];
 
@@ -201,11 +201,9 @@ function buildRatGrid() {
 
         card.innerHTML = `
 
-            <div class="ratEmoji">
-
-                ${rat.emoji}
-
-            </div>
+            <img class="draftRatImage"
+                 src="${rat.image}"
+                 alt="${rat.name}">
 
             <h3>${rat.name}</h3>
 
@@ -214,11 +212,8 @@ function buildRatGrid() {
         `;
 
         card.addEventListener(
-
             "click",
-
             () => toggleRatSelection(rat.id, card)
-
         );
 
         ratGrid.appendChild(card);
@@ -303,7 +298,7 @@ function startRace() {
 
             name: rat.name,
 
-            emoji: rat.emoji,
+            image: rat.image,
 
             lane: 0,
 
@@ -386,20 +381,19 @@ function buildTrack() {
     </div>
 
     <div class="laneName">
-        ${rat.emoji} ${rat.name}
+        <img class="lanePortrait"
+             src="${rat.image}">
+        ${rat.name}
     </div>
 
 </div>
 
 <div class="laneTrack">
 
-    <div
+    <img
         class="ratSprite"
+        src="${rat.image}"
         data-rat="${rat.id}">
-
-        🐀
-
-    </div>
 
 </div>
 
@@ -410,7 +404,6 @@ function buildTrack() {
     });
 
 }
-
 // ======================================================
 // BUILD LEADERBOARD
 // ======================================================
