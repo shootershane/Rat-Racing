@@ -616,55 +616,60 @@ function initializeRaceEngine() {
     Game.countdownStart = null;
     Game.lastFrame = 0;
 
-    Game.phase = "launch";
-
-    Game.storyTimer = randomBetween(2.5, 4.5);
-
-    const archetypes = [
+    // Random race style
+    const raceScripts = [
 
         {
-            name: "Fast Starter",
+            name: "Breakaway",
             launch: 1.08,
-            cruise: 0.99,
+            middle: 1.00,
             finish: 0.96
         },
 
         {
-            name: "Late Closer",
-            launch: 0.96,
-            cruise: 1.00,
-            finish: 1.09
+            name: "Comeback",
+            launch: 0.95,
+            middle: 1.00,
+            finish: 1.10
         },
 
         {
-            name: "Surger",
-            launch: 0.99,
-            cruise: 1.08,
+            name: "Pack Battle",
+            launch: 1.00,
+            middle: 1.03,
+            finish: 1.03
+        },
+
+        {
+            name: "Late Charge",
+            launch: 0.97,
+            middle: 0.99,
+            finish: 1.12
+        },
+
+        {
+            name: "Wire To Wire",
+            launch: 1.10,
+            middle: 1.03,
             finish: 0.98
         },
 
         {
-            name: "Steady",
-            launch: 1.02,
-            cruise: 1.02,
-            finish: 1.02
-        },
-
-        {
-            name: "Hot & Cold",
-            launch: 1.07,
-            cruise: 0.96,
-            finish: 1.07
-        },
-
-        {
-            name: "Strong Finisher",
-            launch: 1.00,
-            cruise: 0.99,
-            finish: 1.10
+            name: "Chaotic",
+            launch: randomBetween(0.95,1.10),
+            middle: randomBetween(0.95,1.10),
+            finish: randomBetween(0.95,1.10)
         }
 
     ];
+
+    Game.raceScript =
+        raceScripts[
+            Math.floor(
+                Math.random() *
+                raceScripts.length
+            )
+        ];
 
     Game.racers.forEach(rat => {
 
@@ -676,44 +681,84 @@ function initializeRaceEngine() {
 
         rat.started = false;
 
-        rat.reactionDelay = randomBetween(0.05, 0.40);
+        rat.reactionDelay =
+            randomBetween(0.05,0.45);
 
-        // Physics (same for everyone)
-        rat.acceleration = 14;
-        rat.baseSpeed = 29;
-        rat.maxSpeed = 38;
+        // Physics
 
-        rat.boost = 1;
-        rat.targetBoost = 1;
+        rat.acceleration =
+            randomBetween(12,18);
 
-        // AI values
-        rat.storyBoost = 1;
+        rat.baseSpeed =
+            randomBetween(27,31);
 
-        rat.confidence = 1.00;
-        rat.momentum = 1.00;
+        rat.maxSpeed =
+            randomBetween(36,42);
 
-        // Assign a random race archetype
-        const profile =
-            archetypes[Math.floor(Math.random() * archetypes.length)];
+        rat.boost = 1.0;
+        rat.targetBoost = 1.0;
 
-        rat.raceProfile = profile;
+        // Hidden ratings
 
-        // Small variation so rats with the same archetype
-        // don't behave identically
+        rat.stamina =
+            randomBetween(0.92,1.08);
+
+        rat.consistency =
+            randomBetween(0.94,1.06);
+
+        rat.passing =
+            randomBetween(0.94,1.08);
+
+        rat.clutch =
+            randomBetween(0.94,1.10);
+
+        rat.confidence = 1.0;
+
+        // Assign a role
+
+        const roles = [
+
+            "Leader",
+            "Closer",
+            "Grinder",
+            "Wildcard",
+            "Chaser",
+            "Sprinter"
+
+        ];
+
+        rat.role =
+            roles[
+                Math.floor(
+                    Math.random() *
+                    roles.length
+                )
+            ];
+
         rat.launchFactor =
-            profile.launch * randomBetween(0.985, 1.015);
+            Game.raceScript.launch *
+            randomBetween(0.97,1.03);
 
-        rat.cruiseFactor =
-            profile.cruise * randomBetween(0.985, 1.015);
+        rat.middleFactor =
+            Game.raceScript.middle *
+            randomBetween(0.97,1.03);
 
         rat.finishFactor =
-            profile.finish * randomBetween(0.985, 1.015);
+            Game.raceScript.finish *
+            randomBetween(0.97,1.03);
 
     });
 
+    console.log(
+        "Race Script:",
+        Game.raceScript.name
+    );
+
     raceClock.textContent = "3";
 
-    requestAnimationFrame(countdownLoop);
+    requestAnimationFrame(
+        countdownLoop
+    );
 
 }
 // ======================================================
@@ -839,72 +884,195 @@ function updateRacePhase() {
 
 function updateRaceDirector(delta) {
 
-    const racePercent = Game.raceTime / RACE_DURATION;
+    const racePercent =
+        Game.raceTime / RACE_DURATION;
 
-    // Determine race phase
-    if (racePercent < 0.20) {
+    Game.racers.sort(
+        (a, b) => b.distance - a.distance
+    );
 
-        Game.phase = "launch";
+    const leaderDistance =
+        Game.racers[0].distance;
 
-    }
-    else if (racePercent < 0.80) {
+    Game.racers.forEach((rat, index) => {
 
-        Game.phase = "cruise";
+        let target =
+            rat.baseSpeed;
 
-    }
-    else {
+        // -------------------------
+        // Race script influence
+        // -------------------------
 
-        Game.phase = "finish";
+        if (racePercent < 0.25) {
 
-    }
+            target *= rat.launchFactor;
 
-    const standings = [...Game.racers]
-        .filter(r => !r.finished)
-        .sort((a, b) => b.distance - a.distance);
+        }
+        else if (racePercent < 0.75) {
 
-    standings.forEach((rat, index) => {
+            target *= rat.middleFactor;
 
-        // Select the correct phase multiplier
-        let phaseFactor = 1.0;
+        }
+        else {
 
-        switch (Game.phase) {
+            target *= rat.finishFactor;
 
-            case "launch":
-                phaseFactor = rat.launchFactor;
+        }
+
+        // -------------------------
+        // Hidden role behavior
+        // -------------------------
+
+        switch (rat.role) {
+
+            case "Leader":
+
+                if (index === 0) {
+
+                    target *= 1.05;
+
+                }
+
                 break;
 
-            case "cruise":
-                phaseFactor = rat.cruiseFactor;
+            case "Closer":
+
+                if (racePercent > 0.70) {
+
+                    target *=
+                        1.08 * rat.clutch;
+
+                }
+
                 break;
 
-            case "finish":
-                phaseFactor = rat.finishFactor;
+            case "Grinder":
+
+                target *= rat.stamina;
+
+                break;
+
+            case "Sprinter":
+
+                if (racePercent < 0.20) {
+
+                    target *= 1.08;
+
+                }
+
+                break;
+
+            case "Chaser":
+
+                if (index > 0 && index < 5) {
+
+                    target *=
+                        1.03 * rat.passing;
+
+                }
+
+                break;
+
+            case "Wildcard":
+
+                target *=
+                    randomBetween(
+                        0.97,
+                        1.03
+                    );
+
                 break;
 
         }
 
-        // Drafting
-        let draft = 1.00;
+        // -------------------------
+        // Pack positioning
+        // -------------------------
 
-        if (index > 0)
-            draft += 0.02;
+        const gap =
+            leaderDistance - rat.distance;
 
-        // Leader works harder
-        if (index === 0)
-            draft -= 0.02;
+        if (gap > 180) {
 
-        // Confidence slowly trends toward neutral
-        rat.confidence +=
-            (1.0 - rat.confidence) *
-            0.35 *
-            delta;
+            target *= 1.08;
 
-        // Target boost
-        rat.targetBoost =
-            phaseFactor *
-            draft *
-            rat.storyBoost *
-            rat.confidence;
+        }
+        else if (gap > 100) {
+
+            target *= 1.04;
+
+        }
+        else if (gap < 20 && index === 0) {
+
+            target *= 0.98;
+
+        }
+                // -------------------------
+        // Confidence
+        // -------------------------
+
+        if (index === 0) {
+
+            rat.confidence +=
+                0.10 * delta;
+
+        }
+        else {
+
+            rat.confidence -=
+                0.03 * delta;
+
+        }
+
+        rat.confidence = Math.max(
+            0.90,
+            Math.min(
+                1.15,
+                rat.confidence
+            )
+        );
+
+        target *= rat.confidence;
+
+        // -------------------------
+        // Random surges
+        // -------------------------
+
+        if (Math.random() < 0.006) {
+
+            rat.targetBoost =
+                randomBetween(
+                    1.03,
+                    1.10
+                );
+
+        }
+
+        rat.boost +=
+            (rat.targetBoost - rat.boost) *
+            delta * 2.0;
+
+        target *= rat.boost;
+
+        if (
+            Math.abs(
+                rat.boost -
+                rat.targetBoost
+            ) < 0.01
+        ) {
+
+            rat.targetBoost = 1.0;
+
+        }
+
+        // -------------------------
+        // Smooth target speed
+        // -------------------------
+
+        rat.targetSpeed = Math.min(
+            target,
+            rat.maxSpeed
+        );
 
     });
 
@@ -915,77 +1083,183 @@ function updateRaceDirector(delta) {
 
 function updateRacers(delta) {
 
-    const standings = [...Game.racers]
-        .sort((a, b) => b.distance - a.distance);
-
     Game.racers.forEach(rat => {
 
-        if (rat.finished)
-            return;
+        if (rat.finished) return;
 
-        // Wait for the rat's reaction time
+        // -------------------------
+        // Reaction delay
+        // -------------------------
+
         if (!rat.started) {
 
-            if (Game.raceTime < rat.reactionDelay)
+            if (Game.raceTime >= rat.reactionDelay) {
+
+                rat.started = true;
+
+            } else {
+
                 return;
 
-            rat.started = true;
+            }
 
         }
 
-        // Smoothly move toward the Race Director's target
-        rat.boost +=
-            (rat.targetBoost - rat.boost) *
-            2.8 *
-            delta;
+        // -------------------------
+        // Smooth acceleration
+        // -------------------------
 
-        const targetSpeed =
-            rat.baseSpeed *
-            rat.boost;
+        const accelRate =
+            rat.acceleration * delta;
 
-        // Accelerate / decelerate
-        if (rat.speed < targetSpeed) {
+        if (rat.speed < rat.targetSpeed) {
 
-            rat.speed += rat.acceleration * delta;
+            rat.speed = Math.min(
+                rat.speed + accelRate,
+                rat.targetSpeed
+            );
 
-            if (rat.speed > targetSpeed)
-                rat.speed = targetSpeed;
+        } else {
 
-        }
-        else {
-
-            rat.speed -= rat.acceleration * delta;
-
-            if (rat.speed < targetSpeed)
-                rat.speed = targetSpeed;
+            rat.speed = Math.max(
+                rat.speed - accelRate * 0.8,
+                rat.targetSpeed
+            );
 
         }
 
-        // Natural stride variation
-        rat.speed *= randomBetween(0.996, 1.004);
+        // -------------------------
+        // Fatigue
+        // -------------------------
 
-        if (rat.speed > rat.maxSpeed)
-            rat.speed = rat.maxSpeed;
+        const racePercent =
+            Game.raceTime / RACE_DURATION;
 
-        if (rat.speed < 0)
-            rat.speed = 0;
+        let fatigue = 1.0;
 
-        // Move
-        rat.distance += rat.speed * delta;
+        if (racePercent > 0.55) {
 
-        // Finish
+            fatigue -=
+                (racePercent - 0.55) *
+                0.18 *
+                (2 - rat.stamina);
+
+        }
+
+        // -------------------------
+        // Drafting
+        // -------------------------
+
+        let draftBonus = 1.0;
+
+        Game.racers.forEach(other => {
+
+            if (other === rat) return;
+
+            const gap =
+                other.distance - rat.distance;
+
+            if (gap > 15 && gap < 70) {
+
+                draftBonus = Math.max(
+                    draftBonus,
+                    1.025
+                );
+
+            }
+
+        });
+
+        // -------------------------
+        // Passing bonus
+        // -------------------------
+
+        let passBonus = 1.0;
+
+        Game.racers.forEach(other => {
+
+            if (other === rat) return;
+
+            const gap =
+                other.distance - rat.distance;
+
+            if (gap > 0 && gap < 35) {
+
+                passBonus =
+                    Math.max(
+                        passBonus,
+                        rat.passing
+                    );
+
+            }
+
+        });
+
+        let finalSpeed =
+            rat.speed *
+            fatigue *
+            draftBonus *
+            passBonus;
+                // -------------------------
+        // Small random movement
+        // -------------------------
+
+        finalSpeed *= randomBetween(
+            0.998,
+            1.002
+        );
+
+        // -------------------------
+        // Move the rat
+        // -------------------------
+
+        rat.distance +=
+            finalSpeed * delta;
+
+        rat.speed = finalSpeed;
+
+        // -------------------------
+        // Finish detection
+        // -------------------------
+
         if (rat.distance >= TRACK_LENGTH) {
 
-            rat.distance = TRACK_LENGTH;
+            rat.distance =
+                TRACK_LENGTH;
 
             rat.finished = true;
-            rat.finishTime = Game.raceTime;
+
+            rat.finishTime =
+                Game.raceTime;
 
             Game.results.push(rat);
 
         }
 
     });
+
+    // -------------------------
+    // Keep leaderboard updated
+    // -------------------------
+
+    Game.racers.sort(
+        (a, b) => b.distance - a.distance
+    );
+
+    // -------------------------
+    // End race
+    // -------------------------
+
+    if (
+        !Game.raceFinished &&
+        Game.results.length === Game.racers.length
+    ) {
+
+        Game.raceFinished = true;
+
+        finishRace();
+
+    }
 
 }
 // ======================================================
