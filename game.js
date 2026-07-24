@@ -616,49 +616,105 @@ function initializeRaceEngine() {
     Game.countdownStart = null;
     Game.lastFrame = 0;
 
-    // Random race style
+    // ----------------------------------
+    // MASTER RACE SCRIPTS
+    // ----------------------------------
+
     const raceScripts = [
 
         {
-            name: "Breakaway",
-            launch: 1.08,
-            middle: 1.00,
-            finish: 0.96
-        },
+            name: "Photo Finish",
 
-        {
-            name: "Comeback",
-            launch: 0.95,
-            middle: 1.00,
-            finish: 1.10
+            finishTimes: [
+                44.20,
+                44.28,
+                44.36,
+                45.10,
+                45.80,
+                46.40,
+                47.10,
+                47.90,
+                48.70,
+                49.70,
+                50.60,
+                51.40
+            ]
         },
 
         {
             name: "Pack Battle",
-            launch: 1.00,
-            middle: 1.03,
-            finish: 1.03
+
+            finishTimes: [
+                44.80,
+                45.00,
+                45.15,
+                45.40,
+                45.70,
+                46.00,
+                46.40,
+                46.90,
+                47.50,
+                48.30,
+                49.20,
+                50.20
+            ]
         },
 
         {
             name: "Late Charge",
-            launch: 0.97,
-            middle: 0.99,
-            finish: 1.12
+
+            finishTimes: [
+                44.40,
+                44.70,
+                45.10,
+                45.60,
+                46.10,
+                46.80,
+                47.20,
+                47.80,
+                48.50,
+                49.40,
+                50.60,
+                51.80
+            ]
         },
 
         {
-            name: "Wire To Wire",
-            launch: 1.10,
-            middle: 1.03,
-            finish: 0.98
+            name: "Breakaway",
+
+            finishTimes: [
+                43.90,
+                45.30,
+                46.00,
+                46.60,
+                47.20,
+                47.90,
+                48.50,
+                49.20,
+                50.00,
+                50.80,
+                51.60,
+                52.50
+            ]
         },
 
         {
-            name: "Chaotic",
-            launch: randomBetween(0.95,1.10),
-            middle: randomBetween(0.95,1.10),
-            finish: randomBetween(0.95,1.10)
+            name: "Blowout",
+
+            finishTimes: [
+                43.60,
+                45.80,
+                46.80,
+                47.70,
+                48.50,
+                49.20,
+                50.00,
+                50.90,
+                51.70,
+                52.50,
+                53.20,
+                54.00
+            ]
         }
 
     ];
@@ -671,7 +727,51 @@ function initializeRaceEngine() {
             )
         ];
 
-    Game.racers.forEach(rat => {
+    console.log(
+        "Race Script:",
+        Game.raceScript.name
+    );
+
+    // ----------------------------------
+    // BUILD STORY SLOTS
+    // ----------------------------------
+
+    let storySlots =
+        Game.raceScript.finishTimes.map(time => {
+
+            return {
+
+                finishTime:
+                    time +
+                    randomBetween(-0.30,0.30),
+
+                startBias:
+                    randomBetween(.88,1.12),
+
+                middleBias:
+                    randomBetween(.88,1.12),
+
+                finishBias:
+                    randomBetween(.88,1.12)
+
+            };
+
+        });
+        // ----------------------------------
+    // Shuffle story slots
+    // ----------------------------------
+
+    shuffleArray(storySlots);
+
+    // ----------------------------------
+    // Assign one story to each racer
+    // ----------------------------------
+
+    Game.racers.forEach((rat, index) => {
+
+        const story = storySlots[index];
+
+        rat.story = story;
 
         rat.distance = 0;
         rat.speed = 0;
@@ -682,76 +782,47 @@ function initializeRaceEngine() {
         rat.started = false;
 
         rat.reactionDelay =
-            randomBetween(0.05,0.45);
+            randomBetween(0.05,0.35);
 
-        // Physics
-
+        // Temporary race attributes
         rat.acceleration =
-            randomBetween(12,18);
-
-        rat.baseSpeed =
-            randomBetween(27,31);
-
-        rat.maxSpeed =
-            randomBetween(36,42);
-
-        rat.boost = 1.0;
-        rat.targetBoost = 1.0;
-
-        // Hidden ratings
-
-        rat.stamina =
-            randomBetween(0.92,1.08);
-
-        rat.consistency =
-            randomBetween(0.94,1.06);
+            randomBetween(0.90,1.10);
 
         rat.passing =
-            randomBetween(0.94,1.08);
+            randomBetween(0.90,1.10);
 
-        rat.clutch =
-            randomBetween(0.94,1.10);
+        rat.consistency =
+            randomBetween(0.90,1.10);
 
         rat.confidence = 1.0;
 
-        // Assign a role
+        // These are what the new engine
+        // will use instead of targetSpeed.
 
-        const roles = [
+        rat.targetFinishTime =
+            story.finishTime;
 
-            "Leader",
-            "Closer",
-            "Grinder",
-            "Wildcard",
-            "Chaser",
-            "Sprinter"
+        rat.startBias =
+            story.startBias;
 
-        ];
+        rat.middleBias =
+            story.middleBias;
 
-        rat.role =
-            roles[
-                Math.floor(
-                    Math.random() *
-                    roles.length
-                )
-            ];
-
-        rat.launchFactor =
-            Game.raceScript.launch *
-            randomBetween(0.97,1.03);
-
-        rat.middleFactor =
-            Game.raceScript.middle *
-            randomBetween(0.97,1.03);
-
-        rat.finishFactor =
-            Game.raceScript.finish *
-            randomBetween(0.97,1.03);
+        rat.finishBias =
+            story.finishBias;
 
     });
 
-    console.log(
-        "Race Script:",
-        Game.raceScript.name
+    console.table(
+
+        Game.racers.map(r => ({
+
+            Rat: r.name,
+            Lane: r.lane,
+            Finish: r.targetFinishTime.toFixed(2)
+
+        }))
+
     );
 
     raceClock.textContent = "3";
