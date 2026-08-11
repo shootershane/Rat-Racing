@@ -1487,6 +1487,25 @@ let commentaryTimer = 0;
 function updateCommentary(delta) {
 
     // ==================================================
+    // STOP ALL COMMENTARY AFTER FIRST PLACE FINISHES
+    // ==================================================
+
+    if (Game.results.length > 0) {
+
+        if (!Game.commentaryStopped) {
+
+            Game.commentaryStopped = true;
+
+            window.speechSynthesis.cancel();
+
+        }
+
+        return;
+
+    }
+
+
+    // ==================================================
     // DO NOTHING UNTIL RACE IS RUNNING
     // ==================================================
 
@@ -1496,7 +1515,6 @@ function updateCommentary(delta) {
 
     // ==================================================
     // COMMENTARY TIMER
-    // Prevent announcer from talking constantly
     // ==================================================
 
     commentaryTimer -= delta;
@@ -1511,7 +1529,6 @@ function updateCommentary(delta) {
 
     const racers =
         [...Game.racers]
-        .filter(rat => !rat.finished)
         .sort((a, b) =>
             b.distance - a.distance
         );
@@ -1521,29 +1538,31 @@ function updateCommentary(delta) {
         return;
 
 
-    const leader = racers[0];
+    const leader =
+        racers[0];
 
-    const second = racers[1];
+    const second =
+        racers[1];
+
 
     const racePercent =
         leader.distance / TRACK_LENGTH;
 
 
     // ==================================================
-    // COMMENTARY DISPLAY
+    // COMMENTARY DISPLAY + VOICE
     // ==================================================
-
-    const log =
-        document.getElementById(
-            "commentaryLog"
-        );
-
 
     function announce(message) {
 
-        // ------------------------------
-        // Put commentary on screen
-        // ------------------------------
+        // Never announce anything after a winner exists
+        if (Game.results.length > 0)
+            return;
+
+        const log =
+            document.getElementById(
+                "commentaryLog"
+            );
 
         if (log) {
 
@@ -1570,17 +1589,7 @@ function updateCommentary(delta) {
 
         }
 
-
-        // ------------------------------
-        // Speak commentary
-        // ------------------------------
-
         speakCommentary(message);
-
-
-        // ------------------------------
-        // Wait before next announcement
-        // ------------------------------
 
         commentaryTimer =
             randomBetween(4.5, 7.0);
@@ -1702,7 +1711,7 @@ function updateCommentary(delta) {
 
 
     // ==================================================
-    // CLOSE BATTLE FOR THE LEAD
+    // CLOSE BATTLE
     // ==================================================
 
     if (second) {
