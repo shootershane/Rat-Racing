@@ -1044,38 +1044,50 @@ function raceLoop(timestamp) {
     if (Game.raceFinished)
         return;
 
+
     const delta =
         (timestamp - Game.lastFrame) / 1000;
 
-    Game.lastFrame = timestamp;
 
-    Game.raceTime += delta;
+    Game.lastFrame =
+        timestamp;
+
+
+    Game.raceTime +=
+        delta;
+
 
     raceClock.textContent =
         Game.raceTime.toFixed(2);
 
+
     updateRacePhase();
+
 
     updateRaceDirector(delta);
 
+
     updateRacers(delta);
+
 
     updateLeaderboard();
 
+
     updateTrackSprites();
 
-    updateCommentary(delta);
 
     checkForFinish();
 
+
     if (!Game.raceFinished) {
 
-        requestAnimationFrame(raceLoop);
+        requestAnimationFrame(
+            raceLoop
+        );
 
     }
 
 }
-
 // ======================================================
 // RACE PHASE
 // ======================================================
