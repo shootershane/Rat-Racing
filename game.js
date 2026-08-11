@@ -571,6 +571,8 @@ function resetRaceState() {
 
     Game.results = [];
 
+    Game.commentaryStopped = false;
+    
     Game.racers.forEach(rat => {
 
         rat.distance = 0;
@@ -1076,6 +1078,9 @@ function raceLoop(timestamp) {
     updateTrackSprites();
 
 
+    updateCommentary(delta);
+
+
     checkForFinish();
 
 
@@ -1495,7 +1500,517 @@ const COMMENTARY = [
 ];
 
 let commentaryTimer = 0;
+// ======================================================
+// FINISH ANNOUNCER
+// ======================================================
 
+function announceFinishResults() {
+
+    // Stop normal race commentary
+    Game.commentaryStopped = true;
+
+    // Stop whatever live commentary is currently speaking
+    window.speechSynthesis.cancel();
+
+
+    function speakLine(text, callback = null) {
+
+        const speech =
+            new SpeechSynthesisUtterance(text);
+
+
+        if (announcerVoice) {
+
+            speech.voice =
+                announcerVoice;
+
+        }
+
+
+        speech.rate = 1.05;
+        speech.pitch = 0.85;
+        speech.volume = 1.0;
+
+
+        if (callback) {
+
+            speech.onend =
+                callback;
+
+        }
+
+
+        window.speechSynthesis.speak(
+            speech
+        );
+
+    }
+
+
+    // ==========================================
+    // WAIT FOR A FINISHER
+    // ==========================================
+
+    function waitForPlace(place, callback) {
+
+        if (
+            Game.results.length >= place
+        ) {
+
+            const rat =
+                Game.results[place - 1];
+
+
+            callback(rat);
+
+            return;
+
+        }
+
+
+        setTimeout(() => {
+
+            waitForPlace(
+                place,
+                callback
+            );
+
+        }, 100);
+
+    }
+
+
+    // ==========================================
+    // FIRST PLACE
+    // ==========================================
+
+    waitForPlace(
+        1,
+        first => {
+
+            speakLine(
+                `And ${first.name} wins Rat Racing!`,
+                () => {
+
+                    // ==================================
+                    // SECOND PLACE
+                    // ==================================
+
+                    waitForPlace(
+                        2,
+                        second => {
+
+                            speakLine(
+                                `Second place goes to ${second.name}!`,
+                                () => {
+
+                                    // ==============================
+                                    // THIRD PLACE
+                                    // ==============================
+
+                                    waitForPlace(
+                                        3,
+                                        third => {
+
+                                            speakLine(
+                                                `And ${third.name} takes third place!`
+                                            );
+
+                                        }
+                                    );
+
+                                }
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+// ======================================================
+// LIVE COMMENTARY
+// ======================================================
+
+let commentaryTimer = 2;
+
+
+function updateCommentary(delta) {
+
+    // Stop all live commentary once
+    // first place has been determined.
+    if (Game.commentaryStopped)
+        return;
+
+
+    if (
+        !Game.raceStarted ||
+        Game.raceFinished
+    )
+        return;
+
+
+    commentaryTimer -= delta;
+
+
+    if (commentaryTimer > 0)
+        return;
+
+
+    const racers =
+        [...Game.racers]
+        .filter(
+            rat => !rat.finished
+        )
+        .sort(
+            (a, b) =>
+                b.distance -
+                a.distance
+        );
+
+
+    if (
+        racers.length === 0
+    )
+        return;
+
+
+    const leader =
+        racers[0];
+
+
+    const second =
+        racers[1];
+
+
+    const racePercent =
+        leader.distance /
+        TRACK_LENGTH;
+
+
+    let message = null;
+
+
+    // ==========================================
+    // FIRST LEADER
+    // ==========================================
+
+    if (
+        !Game.lastAnnouncedLeader
+    ) {
+
+        Game.lastAnnouncedLeader =
+            leader.id;
+
+
+        const lines = [
+
+            `${leader.name} jumps out to the early lead!`,
+
+            `${leader.name} gets a great start and takes the lead!`,
+
+            `${leader.name} is showing the way early!`,
+
+            `It's ${leader.name} out in front!`
+
+        ];
+
+
+        message =
+            lines[
+                Math.floor(
+                    Math.random() *
+                    lines.length
+                )
+            ];
+
+    }
+
+
+    // ==========================================
+    // LEAD CHANGE
+    // ==========================================
+
+    else if (
+        leader.id !==
+        Game.lastAnnouncedLeader
+    ) {
+
+        Game.lastAnnouncedLeader =
+            leader.id;
+
+
+        const lines = [
+
+            `${leader.name} takes the lead!`,
+
+            `Here comes ${leader.name}! ${leader.name} moves out in front!`,
+
+            `${leader.name} has taken over the top spot!`,
+
+            `Look at ${leader.name}! A big move into the lead!`,
+
+            `${leader.name} surges to the front!`
+
+        ];
+
+
+        message =
+            lines[
+                Math.floor(
+                    Math.random() *
+                    lines.length
+                )
+            ];
+
+    }
+
+
+    // ==========================================
+    // FINAL STRETCH
+    // ==========================================
+
+    else if (
+        racePercent >= 0.78 &&
+        !Game.finalStretchAnnounced
+    ) {
+
+        Game.finalStretchAnnounced =
+            true;
+
+
+        const lines = [
+
+            `They're coming down the stretch!`,
+
+            `Here they come! It's the final stretch!`,
+
+            `The finish line is coming up fast!`,
+
+            `We're into the final stretch, and ${leader.name} leads the way!`
+
+        ];
+
+
+        message =
+            lines[
+                Math.floor(
+                    Math.random() *
+                    lines.length
+                )
+            ];
+
+    }
+
+
+    // ==========================================
+    // CLOSE BATTLE
+    // ==========================================
+
+    else if (second) {
+
+        const gap =
+            leader.distance -
+            second.distance;
+
+
+        if (
+            gap <
+                TRACK_LENGTH * 0.025 &&
+            racePercent > 0.35
+        ) {
+
+            const lines = [
+
+                `${leader.name} and ${second.name} are neck and neck!`,
+
+                `${second.name} is right on ${leader.name}'s tail!`,
+
+                `What a battle! ${leader.name} and ${second.name} are side by side!`,
+
+                `${leader.name} can't shake ${second.name}!`,
+
+                `${second.name} is putting serious pressure on ${leader.name}!`
+
+            ];
+
+
+            message =
+                lines[
+                    Math.floor(
+                        Math.random() *
+                        lines.length
+                    )
+                ];
+
+        }
+
+    }
+
+
+    // ==========================================
+    // LEADER PULLING AWAY
+    // ==========================================
+
+    if (
+        !message &&
+        second
+    ) {
+
+        const gap =
+            leader.distance -
+            second.distance;
+
+
+        if (
+            gap >
+                TRACK_LENGTH * 0.08 &&
+            racePercent > 0.40
+        ) {
+
+            const lines = [
+
+                `${leader.name} is starting to pull away!`,
+
+                `${leader.name} has opened up a big lead!`,
+
+                `They're going to have to catch ${leader.name}!`,
+
+                `${leader.name} is absolutely flying right now!`
+
+            ];
+
+
+            message =
+                lines[
+                    Math.floor(
+                        Math.random() *
+                        lines.length
+                    )
+                ];
+
+        }
+
+    }
+
+
+    // ==========================================
+    // GENERAL COMMENTARY
+    // ==========================================
+
+    if (!message) {
+
+        const middlePack =
+            racers.slice(
+                1,
+                Math.min(
+                    6,
+                    racers.length
+                )
+            );
+
+
+        if (
+            middlePack.length > 0
+        ) {
+
+            const randomRat =
+                middlePack[
+                    Math.floor(
+                        Math.random() *
+                        middlePack.length
+                    )
+                ];
+
+
+            const lines = [
+
+                `${randomRat.name} is looking for an opening!`,
+
+                `${randomRat.name} is trying to make a move!`,
+
+                `Keep an eye on ${randomRat.name}!`,
+
+                `${randomRat.name} is hanging right in there!`,
+
+                `The pack is tightening up behind ${leader.name}!`,
+
+                `${leader.name} still leads, but this race is far from over!`
+
+            ];
+
+
+            message =
+                lines[
+                    Math.floor(
+                        Math.random() *
+                        lines.length
+                    )
+                ];
+
+        }
+
+    }
+
+
+    // ==========================================
+    // SAY IT
+    // ==========================================
+
+    if (message) {
+
+        const log =
+            document.getElementById(
+                "commentaryLog"
+            );
+
+
+        if (log) {
+
+            const line =
+                document.createElement(
+                    "div"
+                );
+
+
+            line.textContent =
+                message;
+
+
+            log.prepend(line);
+
+
+            while (
+                log.children.length > 8
+            ) {
+
+                log.removeChild(
+                    log.lastChild
+                );
+
+            }
+
+        }
+
+
+        speakCommentary(
+            message
+        );
+
+
+        commentaryTimer =
+            randomBetween(
+                4.5,
+                7.0
+            );
+
+    }
+
+}
 function updateRacers(delta) {
 
     Game.racers.forEach(rat => {
@@ -1612,52 +2127,17 @@ function updateRacers(delta) {
             Game.results.push(rat);
 
 
-            // ==========================================
-            // FINISH COMMENTARY
-            // ==========================================
+         // ==========================================
+// FINISH COMMENTARY
+// ==========================================
 
-            const finishPlace =
-                Game.results.length;
+if (
+    Game.results.length === 1
+) {
 
+    announceFinishResults();
 
-            // Stop normal race commentary
-            // as soon as first place finishes.
-            if (finishPlace === 1) {
-
-                Game.commentaryStopped = true;
-
-                window.speechSynthesis.cancel();
-
-                speakCommentary(
-                    `And ${rat.name} wins Rat Racing!`
-                );
-
-            }
-
-
-            // Second place
-            else if (finishPlace === 2) {
-
-                speakCommentary(
-                    `Second place goes to ${rat.name}!`
-                );
-
-            }
-
-
-            // Third place
-            else if (finishPlace === 3) {
-
-                speakCommentary(
-                    `And ${rat.name} takes third place!`
-                );
-
-            }
-
-        }
-
-    });
-
+}
 
     // -------------------------
     // Current running order
