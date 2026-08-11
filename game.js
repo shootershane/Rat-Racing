@@ -2145,72 +2145,7 @@ function updateRacers(delta) {
 
 }
 
-         // ==========================================
-// FINISH COMMENTARY
-// ==========================================
-
-if (
-    Game.results.length === 1
-) {
-
-    announceFinishResults();
-
-}
-
-    // -------------------------
-    // Current running order
-    // -------------------------
-
-    Game.racers.sort(
-        (a, b) => {
-
-            if (
-                a.finished &&
-                b.finished
-            ) {
-
-                return (
-                    a.finishTime -
-                    b.finishTime
-                );
-
-            }
-
-
-            if (a.finished)
-                return -1;
-
-
-            if (b.finished)
-                return 1;
-
-
-            return (
-                b.distance -
-                a.distance
-            );
-
-        }
-    );
-
-
-    // -------------------------
-    // Race complete
-    // -------------------------
-
-    if (
-        !Game.raceFinished &&
-        Game.results.length ===
-        Game.racers.length
-    ) {
-
-        Game.raceFinished = true;
-
-        finishRace();
-
-    }
-
-}
+ 
 
 // ======================================================
 // MODIFY RACE LOOP
