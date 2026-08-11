@@ -2042,69 +2042,19 @@ function updateRacers(delta) {
 
 
         // -------------------------
-        // Smoothly move toward
-        // Race Director target
-        // -------------------------
-
-        rat.boost +=
-            (rat.targetBoost - rat.boost) *
-            2.8 *
-            delta;
-
-
-        const targetSpeed =
-            rat.baseSpeed *
-            rat.boost;
-
-
-        // -------------------------
-        // Accelerate / decelerate
-        // -------------------------
-
-        if (rat.speed < targetSpeed) {
-
-            rat.speed +=
-                rat.acceleration * delta;
-
-            if (rat.speed > targetSpeed)
-                rat.speed = targetSpeed;
-
-        } else {
-
-            rat.speed -=
-                rat.acceleration * delta;
-
-            if (rat.speed < targetSpeed)
-                rat.speed = targetSpeed;
-
-        }
-
-
-        // -------------------------
-        // Natural stride variation
-        // -------------------------
-
-        rat.speed *=
-            randomBetween(
-                0.996,
-                1.004
-            );
-
-
-        if (rat.speed > rat.maxSpeed)
-            rat.speed = rat.maxSpeed;
-
-
-        if (rat.speed < 0)
-            rat.speed = 0;
-
-
-        // -------------------------
-        // Move
+        // Move rat
         // -------------------------
 
         rat.distance +=
             rat.speed * delta;
+
+
+        // Never overshoot finish
+        rat.distance =
+            Math.min(
+                rat.distance,
+                TRACK_LENGTH
+            );
 
 
         // -------------------------
@@ -2116,9 +2066,6 @@ function updateRacers(delta) {
             !rat.finished
         ) {
 
-            rat.distance =
-                TRACK_LENGTH;
-
             rat.finished = true;
 
             rat.finishTime =
@@ -2126,6 +2073,78 @@ function updateRacers(delta) {
 
             Game.results.push(rat);
 
+
+            // ==========================================
+            // FIRST PLACE
+            // ==========================================
+
+            if (
+                Game.results.length === 1
+            ) {
+
+                announceFinishResults();
+
+            }
+
+        }
+
+    });
+
+
+    // -------------------------
+    // Current running order
+    // -------------------------
+
+    Game.racers.sort(
+        (a, b) => {
+
+            if (
+                a.finished &&
+                b.finished
+            ) {
+
+                return (
+                    a.finishTime -
+                    b.finishTime
+                );
+
+            }
+
+
+            if (a.finished)
+                return -1;
+
+
+            if (b.finished)
+                return 1;
+
+
+            return (
+                b.distance -
+                a.distance
+            );
+
+        }
+    );
+
+
+    // -------------------------
+    // Race complete
+    // -------------------------
+
+    if (
+        !Game.raceFinished &&
+        Game.results.length ===
+        Game.racers.length
+    ) {
+
+        Game.raceFinished = true;
+
+        finishRace();
+
+    }
+
+}
 
          // ==========================================
 // FINISH COMMENTARY
