@@ -1636,8 +1636,7 @@ function announceFinishResults() {
 // LIVE COMMENTARY
 // ======================================================
 
-let commentaryTimer = 2;
-
+// commentaryTimer already declared above
 
 function updateCommentary(delta) {
 
